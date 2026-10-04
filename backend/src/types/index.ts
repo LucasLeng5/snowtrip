@@ -20,7 +20,7 @@ export interface Resort {
   name: string;
   name_en: string | null;
   location: string;
-  region: 'JP' | 'CN' | 'NZ';
+  nation: 'JP' | 'CN' | 'NZ';
   price: number;
   currency: string;
   photo_url: string | null;

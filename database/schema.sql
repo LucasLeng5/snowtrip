@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS resorts (
   name        VARCHAR(100) NOT NULL,
   name_en     VARCHAR(100) DEFAULT NULL,
   location    VARCHAR(200) NOT NULL,
-  region      ENUM('JP','CN','NZ') NOT NULL,
+  nation      ENUM('JP','CN','NZ') NOT NULL,
+  region      VARCHAR(50)  DEFAULT NULL COMMENT '地区(如:北海道、吉林等)',
   price       DECIMAL(10,2) NOT NULL,
   currency    VARCHAR(10)  NOT NULL DEFAULT 'JPY',
   photo_url   VARCHAR(500) DEFAULT NULL,
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS resorts (
   features    JSON         DEFAULT NULL COMMENT '["特色1","特色2"]',
   is_active   TINYINT(1)   DEFAULT 1,
   created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_region (region)
+  INDEX idx_nation (nation)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─── 预订表 ──────────────────────────────────────────────────
@@ -78,6 +79,9 @@ CREATE TABLE IF NOT EXISTS bookings (
   currency      VARCHAR(10)  NOT NULL,
   status        ENUM('pending','paid','confirmed','cancelled','refunded') DEFAULT 'pending',
   notes         TEXT         DEFAULT NULL,
+  -- 冗余字段（方便查询，避免 JOIN）
+  user_email    VARCHAR(128) DEFAULT NULL COMMENT '用户邮箱（冗余）',
+  resort_name   VARCHAR(128) DEFAULT NULL COMMENT '雪场名称（冗余）',
   created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
@@ -86,7 +90,9 @@ CREATE TABLE IF NOT EXISTS bookings (
   INDEX idx_user_id   (user_id),
   INDEX idx_order_no  (order_no),
   INDEX idx_status    (status),
-  INDEX idx_start_date(start_date)
+  INDEX idx_start_date(start_date),
+  INDEX idx_user_email (user_email),
+  INDEX idx_resort_name (resort_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─── 支付记录表 ──────────────────────────────────────────────

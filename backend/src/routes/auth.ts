@@ -36,41 +36,22 @@ router.post('/register', [
     // 加密密码
     const hash = await bcrypt.hash(password, 12);
 
-    // 生成邮箱验证 token
-    const verifyToken = uuidv4();
-    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小时
-
-    // 写入数据库（is_verified = 0）
+    // 写入数据库(is_verified = 1, 开发环境跳过邮件验证)
     const [result] = await pool.execute(
-      'INSERT INTO users (nickname, email, phone, password_hash, lang, is_verified, reset_token, reset_expires) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
-      [nickname, email, phone, hash, lang, verifyToken, verifyExpires]
+      'INSERT INTO users (nickname, email, phone, password_hash, lang, is_verified) VALUES (?, ?, ?, ?, ?, 1)',
+      [nickname, email, phone, hash, lang]
     );
     const userId = (result as any).insertId;
 
-    // 发送验证邮件
-    const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verifyToken}`;
-    await sendMail(
-      email,
-      '【SnowTrip】請驗證您的電子郵箱',
-      `您好 ${nickname}，\n\n請點擊以下連結驗證您的電子郵箱：\n${verifyUrl}\n\n連結將在24小時後失效。\n\nSnowTrip 團隊`,
-      `
-        <div style="font-family:sans-serif;max-width:500px;margin:auto;padding:32px">
-          <h2 style="color:#0b1929">歡迎加入 SnowTrip 🎿</h2>
-          <p>您好 <strong>${nickname}</strong>，</p>
-          <p>請點擊下方按鈕完成郵箱驗證：</p>
-          <a href="${verifyUrl}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#0ea5e9;color:white;text-decoration:none;border-radius:8px;font-weight:bold">
-            驗證電子郵箱
-          </a>
-          <p style="color:#888;font-size:13px">連結將在 24 小時後失效。如非本人操作請忽略此郵件。</p>
-          <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-          <p style="color:#aaa;font-size:12px">SnowTrip International</p>
-        </div>
-      `
-    );
+    // TODO: 生产环境需要发送邮件验证
+    // const verifyToken = uuidv4();
+    // const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verifyToken}`;
+    // await sendMail(email, '【SnowTrip】請驗證您的電子郵箱', ...);
 
     res.status(201).json({
       success: true,
-      message: '註冊成功！驗證郵件已發送至您的郵箱，請點擊連結完成驗證後即可登入。',
+      message: '註冊成功！現在可以直接登入了(開發環境已跳過郵件驗證)。',
       data: { userId, email }
     });
   } catch (err) {

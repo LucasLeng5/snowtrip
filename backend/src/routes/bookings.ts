@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/db';
@@ -85,8 +86,15 @@ router.post('/', authenticate, [
 // ─── 获取我的预订列表 GET /api/bookings ──────────────────────
 router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   const { status, page = '1', limit = '10' } = req.query;
-  const offset = (Number(page) - 1) * Number(limit);
-
+  
+  // 确保参数是有效的数字
+  const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(String(limit), 10) || 10));
+  const offsetNum = (pageNum - 1) * limitNum;
+  const userId = parseInt(String(req.user!.id), 10);
+  
+  console.log(`查询订单: userId=${userId}, status=${status}, page=${pageNum}, limit=${limitNum}, offset=${offsetNum}`);
+  
   try {
     let sql = `
       SELECT b.*, r.name AS resort_name, r.location, r.photo_url,
@@ -96,13 +104,19 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
       LEFT JOIN coaches c ON b.coach_id  = c.id
       WHERE b.user_id = ?
     `;
-    const params: (string | number)[] = [req.user!.id];
+    const params: any[] = [userId];
 
-    if (status) { sql += ' AND b.status = ?'; params.push(status as string); }
+    if (status && typeof status === 'string') { 
+      sql += ' AND b.status = ?'; 
+      params.push(status); 
+    }
     sql += ' ORDER BY b.created_at DESC LIMIT ? OFFSET ?';
-    params.push(Number(limit), offset);
+    params.push(limitNum, offsetNum);
+    
+    console.log(`SQL: ${sql}, Params:`, params);
 
-    const [rows] = await pool.execute(sql, params);
+    // 尝试使用 query 而不是 execute,避免 prepared statement 的问题
+    const [rows] = await pool.query(sql, params);
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('获取预订列表失败:', err);
@@ -167,6 +181,7 @@ router.patch('/:orderNo/cancel', authenticate, async (req: AuthRequest, res: Res
 
 // ─── 发送预订邮件 POST /api/bookings/send-email ──────────────
 // 前端填写预订资料后调用，同时发送给管理员邮箱和客户邮箱
+// 如果提供了 booking_data，同时创建订单记录
 router.post('/send-email', [
   body('to').isEmail(),
   body('subject').notEmpty(),
@@ -177,7 +192,23 @@ router.post('/send-email', [
     res.status(400).json({ success: false, errors: errors.array() });
     return;
   }
-  const { to, subject, body: text, customerEmail } = req.body;
+  const { to, subject, body: text, customerEmail, booking_data } = req.body;
+
+  // 尝试获取登录用户信息（可选）
+  let authUserId: number | null = null;
+  let authUserEmail: string | null = null;
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'snowtrip_secret_key');
+      authUserId = Number(decoded.id);
+      authUserEmail = decoded.email || null;
+    }
+  } catch (err) {
+    // Token 无效或过期，忽略
+  }
 
   const htmlContent = `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
     <h2 style="color:#0b1929;border-bottom:2px solid #0ea5e9;padding-bottom:8px">🎿 SnowTrip 新預訂通知</h2>
@@ -219,8 +250,229 @@ router.post('/send-email', [
     }
   }
 
-  res.json({ success: true, results });
+  // 如果提供了 booking_data，同时创建订单记录
+  let bookingResult = null;
+  if (booking_data && booking_data.resort_name && booking_data.start_date) {
+    // 优先使用登录用户的邮箱，其次使用表单填写的邮箱
+    const lookupEmail = authUserEmail || customerEmail || booking_data.email || '';
+    bookingResult = await createBookingFromEmail(pool, booking_data, lookupEmail, authUserId);
+  }
+
+  res.json({ success: true, results, booking: bookingResult });
 });
+
+// ─── 辅助：根据邮件请求同时创建订单记录 ─────────────────
+async function createBookingFromEmail(pool: any, bookingData: any, userEmail: string, authUserId?: number | null): Promise<any> {
+  try {
+    // 查找或创建用户
+    let userId = authUserId || null;
+    
+    // 如果没有提供认证用户 ID，则通过邮箱查找或创建
+    if (!userId && userEmail) {
+      const [userRows] = await pool.execute(
+        'SELECT id FROM users WHERE email = ?', [userEmail]
+      );
+      if ((userRows as any[]).length > 0) {
+        userId = (userRows as any[])[0].id;
+      } else if (bookingData.contact_info?.name) {
+        // 用户不存在，创建一个临时用户
+        const tempPassword = await bcrypt.hash('temp123456', 10);
+        const [result] = await pool.execute(
+          'INSERT INTO users (nickname, email, phone, password_hash, is_verified) VALUES (?, ?, ?, ?, 1)',
+          [bookingData.contact_info.name, userEmail, bookingData.contact_info.phone || '', tempPassword]
+        );
+        userId = (result as any).insertId;
+      }
+    }
+
+    if (!userId) {
+      console.warn('无法确定用户ID，跳过订单创建');
+      return null;
+    }
+
+    // 查找雪场 - 尝试多种匹配方式
+    let resort = null;
+    const resortName = bookingData.resort_name?.trim() || '';
+    
+    // 简单的繁简转换映射（常见字符）
+    const tradToSimpMap: Record<string, string> = {
+      '溫': '温', '湯': '汤', '龍': '龙', '馬': '马', '爺': '爷',
+      '輕': '轻', '澤': '泽', '樂': '乐', '爾': '尔',
+      '華': '华', '雲': '云', '電': '电', '車': '车', '纜': '缆',
+      '場': '场', '館': '馆', '灣': '湾', '島': '岛', '區': '区',
+      '縣': '县', '鎮': '镇', '鄉': '乡', '莊': '庄',
+    };
+    
+    // 将繁体转换为简体
+    const simpResortName = resortName.split('').map((c: string) => tradToSimpMap[c] || c).join('');
+    
+    // 0. 先处理常见的英文/混合名称映射
+    let searchName = simpResortName;
+    const nameMap: Record<string, string> = {
+      // 二世谷系列
+      'niseko village': '二世谷・Niseko Village',
+      'niseko united': '二世谷',
+      'grand hirafu': '二世谷・Grand Hirafu',
+      'hanazono': '二世谷・HANAZONO',
+      'annupuri': '二世谷・Annupuri',
+      'moiwa': '二世谷・Moiwa',
+      // 札幌地区
+      'teine': '手稻',
+      'sapporo kokusai': '札幌國際',
+      'sapporo bankei': '札幌盤溪',
+      // 北海道其他
+      'furano': '富良野',
+      'rusutsu': '留壽都',
+      'kiroro': '喜樂樂 Kiroro',
+      'tomamu': '星野',
+      'hoshino': '星野',
+      'asarigawa': '朝里川',
+      'tenguyama': '天狗山',
+      'onze': 'ONZE',
+      // 长野/新潟地区
+      'zao': '藏王温泉',
+      'hakuba': '白马',
+      'nozawa onsen': '野澤溫泉',
+      'myoko': '妙高杉之原',
+      'gala yuzawa': 'GALA 湯澤',
+      'naspa': 'NASPA Ski Garden',
+      'yomase': 'Yomase 溫泉',
+      'madarao': '斑尾高原',
+      'shiga kogen': '志賀高原',
+      'ryuo': '龍王 Ski Park',
+      'naeba': '苗場',
+      'lotte arai': 'LOTTE ARAI Resort',
+      'karuizawa prince': '輕井澤 Prince Hotel',
+      'karuizawa snow park': '輕井澤 Snow Park',
+      'joetsu kokusai': '上越國際',
+      'kagura': '神樂',
+      'kandatsu': '神立 Snow Resort',
+      'ishiuchi maruyama': '石打丸山',
+      'yuzawa kogen': '湯澤高原',
+      'yuzawa nakazato': '湯澤中里',
+      'iwahara': '岩原',
+      // 白马地区
+      'happo one': '八方尾根',
+      'norikura': '乘鞍',
+      'kashimayari': '鹿島槍',
+      'tsugaike': '栂池高原',
+      'goryu': '五龍',
+      'iwatake': '岩岳',
+      'sanosaka': '爺岳',
+      'sakanoue': '佐野坂',
+      // 关西/岐阜地区
+      'dynaland': 'Dynaland',
+      'grand snow': 'Grand Snow',
+      'okuibuki': '奧伊吹',
+      'rokkosan': '六甲山 Snow Park',
+      'biwako valley': '琵琶湖 Valley',
+      'biwako hakkenzan': '琵琶湖箱館山',
+      // 中国雪场
+      'chongli': '崇禮',
+      'wanlong': '萬龍',
+      'genting': '密苑',
+      'thaiwoo': '太舞',
+      // 新西兰雪场
+      'cardrona': '卡德羅納',
+      'treble cone': '三錐山',
+      'coronet peak': '皇冠峰',
+      'the remarkables': '卓越山',
+    };
+    
+    // 如果包含英文关键词，转换为中文前缀
+    for (const [en, zh] of Object.entries(nameMap)) {
+      if (resortName.toLowerCase().includes(en)) {
+        searchName = zh;
+        break;
+      }
+    }
+    
+    // 1. 精确匹配 name
+    const [exactRows] = await pool.execute(
+      'SELECT id, name, price, currency FROM resorts WHERE name = ? AND is_active = 1 LIMIT 1',
+      [resortName]
+    );
+    if ((exactRows as any[]).length > 0) {
+      resort = (exactRows as any[])[0];
+    } else {
+      // 2. LIKE 模糊匹配（使用原始名称）
+      const [likeRows] = await pool.execute(
+        'SELECT id, name, price, currency FROM resorts WHERE name LIKE ? AND is_active = 1 LIMIT 1',
+        [`%${resortName}%`]
+      );
+      if ((likeRows as any[]).length > 0) {
+        resort = (likeRows as any[])[0];
+      } else {
+        // 3. 使用转换后的中文名称进行 LIKE 匹配
+        if (searchName !== resortName) {
+          const [zhLikeRows] = await pool.execute(
+            'SELECT id, name, price, currency FROM resorts WHERE name LIKE ? AND is_active = 1 LIMIT 1',
+            [`%${searchName}%`]
+          );
+          if ((zhLikeRows as any[]).length > 0) {
+            resort = (zhLikeRows as any[])[0];
+          }
+        }
+        // 4. 反向 LIKE（数据库中名称包含前端传来的名称）
+        if (!resort) {
+          const [reverseRows] = await pool.execute(
+            'SELECT id, name, price, currency FROM resorts WHERE ? LIKE CONCAT(name, "%") AND is_active = 1 LIMIT 1',
+            [resortName]
+          );
+          if ((reverseRows as any[]).length > 0) {
+            resort = (reverseRows as any[])[0];
+          }
+        }
+      }
+    }
+
+    if (!resort) {
+      // 输出十六进制以便调试
+      const hexName = Buffer.from(resortName, 'utf-8').toString('hex');
+      console.warn(`未找到雪场: ${resortName} (HEX: ${hexName})`);
+      return null;
+    }
+
+    // 计算总价
+    const price = Number(resort.price) || 0;
+    const days = bookingData.end_date
+      ? Math.max(1, Math.ceil((new Date(bookingData.end_date).getTime() - new Date(bookingData.start_date).getTime()) / (1000*60*60*24)))
+      : 1;
+    const total_amount = price * days;
+    const order_no = genOrderNo();
+
+    const contact_info = JSON.stringify(bookingData.contact_info || {});
+
+    await pool.execute(
+      `INSERT INTO bookings
+        (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
+         start_date, end_date, need_equipment, skill_level, contact_info, total_amount, currency, notes, status,
+         user_email, resort_name)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        order_no, userId, resort.id, bookingData.coach_id || null,
+        bookingData.ski_type || 'ski',
+        bookingData.group_size || 1,
+        bookingData.course_type || 'private',
+        bookingData.start_date, bookingData.end_date || bookingData.start_date,
+        bookingData.need_equipment ? 1 : 0,
+        bookingData.skill_level ?? 0,
+        contact_info,
+        total_amount, resort.currency || 'JPY',
+        bookingData.notes || null,
+        'confirmed',
+        userEmail,
+        resort.name
+      ]
+    );
+
+    console.log(`订单创建成功: ${order_no}, 用户ID: ${userId}, 雪场ID: ${resort.id}, 用户邮箱: ${userEmail}, 雪场名称: ${resort.name}`);
+    return { order_no, total_amount, currency: resort.currency, status: 'confirmed' };
+  } catch (err) {
+    console.error('创建订单记录失败:', err);
+    return null;
+  }
+}
 
 function isEN_subject(subj: string): boolean {
   return subj.startsWith('Ski Lesson');

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   Globe, X, Menu, ChevronDown, ChevronLeft, ChevronRight,
   MapPin, Phone, Mail, Clock, Search, ArrowRight, ArrowLeft, Plus, Minus,
-  Check, Star, CreditCard, Smartphone, LogOut, User
+  Check, Star, CreditCard, Smartphone, LogOut, User, ClipboardList, AlertCircle, CheckCircle
 } from "lucide-react";
 
 // ─── Image imports (ES module — required for Figma Make) ──
@@ -76,6 +76,13 @@ const T = {
     wechat: "微信聯繫", wechatId: "微信 ID：-SkiBum",
     wechatTip: "請在微信中搜索以上 ID 與我們聯繫",
     close: "關閉",
+    myOrders: "我的訂單", orderNo: "訂單號碼", orderResort: "雪場", orderDate: "上課日期",
+    orderSkiType: "滑雪種類", orderGroupSize: "人數", orderFee: "課程費用", orderStatus: "訂單狀態",
+    orderDetail: "查看詳情", orderCancel: "取消訂單", orderBack: "返回", orderAll: "全部",
+    orderPending: "待付款", orderPaid: "已付款", orderConfirmed: "已確認", orderCompleted: "已完成", orderCancelled: "已取消",
+    orderEmpty: "暫無訂單", orderConfirmCancel: "確認取消此訂單？", orderCancelSuccess: "訂單已取消",
+    orderCoach: "教練", orderEquip: "租借裝備", orderContact: "聯絡方式", orderPayMethod: "支付方式",
+    equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
   },
   SC: {
     nav: ["主页","预订","授课雪场","滑雪攻略","常见问题","联系我们"],
@@ -108,6 +115,13 @@ const T = {
     wechat: "微信联系", wechatId: "微信 ID：-SkiBum",
     wechatTip: "请在微信中搜索以上 ID 与我们联系",
     close: "关闭",
+    myOrders: "我的订单", orderNo: "订单号码", orderResort: "雪场", orderDate: "上课日期",
+    orderSkiType: "滑雪种类", orderGroupSize: "人数", orderFee: "课程费用", orderStatus: "订单状态",
+    orderDetail: "查看详情", orderCancel: "取消订单", orderBack: "返回", orderAll: "全部",
+    orderPending: "待付款", orderPaid: "已付款", orderConfirmed: "已确认", orderCompleted: "已完成", orderCancelled: "已取消",
+    orderEmpty: "暂无订单", orderConfirmCancel: "确认取消此订单？", orderCancelSuccess: "订单已取消",
+    orderCoach: "教练", orderEquip: "租借装备", orderContact: "联系方式", orderPayMethod: "支付方式",
+    equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
   },
   EN: {
     nav: ["Home","Booking","Teaching Resorts","Ski Guide","FAQ","Contact Us"],
@@ -140,6 +154,13 @@ const T = {
     wechat: "WeChat Contact", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "Search the above ID in WeChat to contact us",
     close: "Close",
+    myOrders: "My Orders", orderNo: "Order No.", orderResort: "Resort", orderDate: "Course Dates",
+    orderSkiType: "Ski Type", orderGroupSize: "Group Size", orderFee: "Course Fee", orderStatus: "Status",
+    orderDetail: "View Details", orderCancel: "Cancel Order", orderBack: "Back", orderAll: "All",
+    orderPending: "Pending", orderPaid: "Paid", orderConfirmed: "Confirmed", orderCompleted: "Completed", orderCancelled: "Cancelled",
+    orderEmpty: "No orders yet", orderConfirmCancel: "Cancel this order?", orderCancelSuccess: "Order cancelled",
+    orderCoach: "Coach", orderEquip: "Equipment", orderContact: "Contact", orderPayMethod: "Payment",
+    equipYes: "Yes", equipNo: "No", orderLevel: "Level",
   },
   JP: {
     nav: ["ホーム","予約","レッスンゲレンデ","スキーガイド","よくある質問","お問い合わせ"],
@@ -172,6 +193,13 @@ const T = {
     wechat: "WeChatで連絡", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "WeChatで上記IDを検索してお問い合わせください",
     close: "閉じる",
+    myOrders: "マイオーダー", orderNo: "注文番号", orderResort: "ゲレンデ", orderDate: "レッスン日",
+    orderSkiType: "スキー種類", orderGroupSize: "人数", orderFee: "レッスン料金", orderStatus: "ステータス",
+    orderDetail: "詳細を見る", orderCancel: "キャンセル", orderBack: "戻る", orderAll: "すべて",
+    orderPending: "未払い", orderPaid: "支払い済み", orderConfirmed: "確認済み", orderCompleted: "完了", orderCancelled: "キャンセル済",
+    orderEmpty: "注文がありません", orderConfirmCancel: "この注文をキャンセルしますか？", orderCancelSuccess: "注文をキャンセルしました",
+    orderCoach: "コーチ", orderEquip: "装備レンタル", orderContact: "連絡先", orderPayMethod: "支払い方法",
+    equipYes: "必要", equipNo: "不要", orderLevel: "レベル",
   },
   KR: {
     nav: ["홈","예약","강습 스키장","스키 가이드","자주 묻는 질문","문의하기"],
@@ -204,6 +232,13 @@ const T = {
     wechat: "WeChat 연락", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "WeChat에서 위 ID를 검색하여 문의해 주세요",
     close: "닫기",
+    myOrders: "내 주문", orderNo: "주문번호", orderResort: "스키장", orderDate: "강습 날짜",
+    orderSkiType: "스키 유형", orderGroupSize: "인원", orderFee: "강습 요금", orderStatus: "주문 상태",
+    orderDetail: "상세 보기", orderCancel: "주문 취소", orderBack: "뒤로", orderAll: "전체",
+    orderPending: "미결제", orderPaid: "결제완료", orderConfirmed: "확인됨", orderCompleted: "완료", orderCancelled: "취소됨",
+    orderEmpty: "주문이 없습니다", orderConfirmCancel: "이 주문을 취소하시겠습니까?", orderCancelSuccess: "주문이 취소되었습니다",
+    orderCoach: "코치", orderEquip: "장비 렌탈", orderContact: "연락처", orderPayMethod: "결제 방법",
+    equipYes: "필요", equipNo: "불필요", orderLevel: "레벨",
   },
 } as const;
 
@@ -796,7 +831,13 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(0);
   const [showReg, setShowReg] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<string | null>(() => {
+    // 从 localStorage 恢复登录状态和 JWT token
+    const token = localStorage.getItem('_jwtToken');
+    const user = localStorage.getItem('_loggedInUser');
+    if (token && user) return user;
+    return null;
+  });
   const [showLang, setShowLang] = useState(false);
   const [showBookDropdown, setShowBookDropdown] = useState(false);
   const [activeRegion, setActiveRegion] = useState<"JP"|"NZ"|"CN">("JP");
@@ -822,7 +863,91 @@ export default function App() {
   const [payMethod, setPayMethod] = useState("");
   const langRef = useRef<HTMLDivElement>(null);
 
+  // ─── My Orders state ──────────────────────────────────
+  const [showOrders, setShowOrders] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orderFilter, setOrderFilter] = useState("");
+  const [orderDetail, setOrderDetail] = useState<any | null>(null);
+  const [orderDetailLoading, setOrderDetailLoading] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
+  const [canceling, setCanceling] = useState(false);
+
   const tr = T[lang] as Tr;
+
+  // ─── My Orders helpers ────────────────────────────────
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('_jwtToken');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  };
+
+  const fetchOrders = async (status?: string) => {
+    if (!loggedInUser) return;
+    setOrdersLoading(true);
+    try {
+      const url = status ? `/api/bookings?status=${status}` : '/api/bookings';
+      const res = await fetch(url, { headers: getAuthHeaders() });
+      const data = await res.json();
+      if (data.success) setOrders(data.data || []);
+      else setOrders([]);
+    } catch { setOrders([]); }
+    finally { setOrdersLoading(false); }
+  };
+
+  const fetchOrderDetail = async (orderNo: string) => {
+    setOrderDetailLoading(true);
+    try {
+      const res = await fetch(`/api/bookings/${orderNo}`, { headers: getAuthHeaders() });
+      const data = await res.json();
+      if (data.success) setOrderDetail(data.data);
+    } catch { /* ignore */ }
+    finally { setOrderDetailLoading(false); }
+  };
+
+  const handleCancelOrder = async (orderNo: string) => {
+    setCanceling(true);
+    try {
+      const res = await fetch(`/api/bookings/${orderNo}/cancel`, { 
+        method: 'PATCH',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCancelConfirm(null);
+        setOrderDetail(null);
+        fetchOrders(orderFilter || undefined);
+      }
+    } catch { /* ignore */ }
+    finally { setCanceling(false); }
+  };
+
+  const statusColor: Record<string, string> = {
+    pending: 'bg-amber-100 text-amber-700',
+    paid: 'bg-blue-100 text-blue-700',
+    confirmed: 'bg-green-100 text-green-700',
+    completed: 'bg-gray-100 text-gray-600',
+    cancelled: 'bg-red-100 text-red-600',
+  };
+
+  const statusLabel = (s: string) => {
+    const map: Record<string, string> = {
+      pending: tr.orderPending, paid: tr.orderPaid, confirmed: tr.orderConfirmed,
+      completed: tr.orderCompleted, cancelled: tr.orderCancelled,
+    };
+    return map[s] || s;
+  };
+
+  const orderFilterTabs = [
+    { value: "", label: tr.orderAll },
+    { value: "pending", label: tr.orderPending },
+    { value: "confirmed", label: tr.orderConfirmed },
+    { value: "completed", label: tr.orderCompleted },
+    { value: "cancelled", label: tr.orderCancelled },
+  ];
+
+  useEffect(() => {
+    if (showOrders) fetchOrders(orderFilter || undefined);
+  }, [showOrders, orderFilter]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -900,6 +1025,27 @@ export default function App() {
     setTab(initTab);
     if (initRegion) setActiveRegion(initRegion);
     window.history.replaceState({ tab: initTab }, "", window.location.pathname);
+
+    // ── Handle email verification from URL ──
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyToken = urlParams.get('token');
+    if (window.location.pathname.includes('verify-email') && verifyToken) {
+      fetch(`/api/auth/verify-email?token=${encodeURIComponent(verifyToken)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert(data.message || '邮箱验证成功！现在可以登录了。');
+            // 清除 URL 中的 token 参数
+            window.history.replaceState({}, '', '/');
+          } else {
+            alert(data.message || '验证失败，请重新注册或联系客服。');
+          }
+        })
+        .catch(() => {
+          alert('网络错误，请稍后重试。');
+        });
+    }
+
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
@@ -990,12 +1136,19 @@ export default function App() {
           <div className="hidden sm:flex items-center gap-2">
             {loggedInUser ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 text-white text-sm font-semibold px-3 py-2">
+                <button
+                  onClick={() => { setShowOrders(true); setOrderDetail(null); setOrderFilter(""); }}
+                  className="text-white/80 hover:text-white text-sm font-semibold px-3 py-2 rounded-lg border border-white/30 hover:border-white/60 transition-colors flex items-center gap-1.5"
+                >
+                  <ClipboardList size={14} />
+                  {tr.myOrders}
+                </button>
+                <div className="flex items-center gap-1.5 text-white text-sm font-semibold px-2 py-2">
                   <User size={15} />
-                  <span className="max-w-[120px] truncate">{loggedInUser}</span>
+                  <span className="max-w-[100px] truncate">{loggedInUser}</span>
                 </div>
                 <button
-                  onClick={() => setLoggedInUser(null)}
+                  onClick={() => { setLoggedInUser(null); localStorage.removeItem('_loggedInUser'); localStorage.removeItem('_jwtToken'); }}
                   className="text-white/80 hover:text-white text-sm font-semibold px-3 py-2 rounded-lg border border-white/30 hover:border-white/60 transition-colors flex items-center gap-1"
                 >
                   <LogOut size={14} />
@@ -1071,11 +1224,15 @@ export default function App() {
           <div className="px-6 pb-4 pt-2 flex flex-col gap-2">
             {loggedInUser ? (
               <>
+                <button onClick={() => { setShowOrders(true); setOrderDetail(null); setOrderFilter(""); setMobileMenu(false); }} className="w-full border border-white/30 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center gap-1.5">
+                  <ClipboardList size={14} />
+                  {tr.myOrders}
+                </button>
                 <div className="flex items-center gap-1.5 text-white text-sm font-semibold py-2 px-1">
                   <User size={15} />
                   <span className="truncate">{loggedInUser}</span>
                 </div>
-                <button onClick={() => { setLoggedInUser(null); setMobileMenu(false); }} className="w-full border border-white/30 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center gap-1.5">
+                <button onClick={() => { setLoggedInUser(null); localStorage.removeItem('_loggedInUser'); localStorage.removeItem('_jwtToken'); setMobileMenu(false); }} className="w-full border border-white/30 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center gap-1.5">
                   <LogOut size={14} />
                   {lang === "EN" ? "Logout" : lang === "JP" ? "ログアウト" : lang === "KR" ? "로그아웃" : "退出"}
                 </button>
@@ -2432,8 +2589,8 @@ export default function App() {
                   };
 
                   const onSendEmail = async () => {
-                    if (!bName || !bDate || !bSkiType || !bDuration || !bLevel) {
-                      alert(isEN ? "Please fill in all required fields (Name, Date, Board Type, Duration, Level)" : isSC ? "请填写所有必填项（姓名、日期、器材类型、课时、程度）" : "請填寫所有必填項（姓名、日期、器材類型、課時、程度）");
+                    if (!bName || !bDate || !bSkiType || !bDuration || !bLevel || !bResort) {
+                      alert(isEN ? "Please fill in all required fields (Name, Date, Resort, Board Type, Duration, Level)" : isSC ? "请填写所有必填项（姓名、日期、雪场、器材类型、课时、程度）" : "請填寫所有必填項（姓名、日期、雪場、器材類型、課時、程度）");
                       return;
                     }
                     if (!bEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bEmail)) {
@@ -2446,12 +2603,27 @@ export default function App() {
                     try {
                       const resp = await fetch("/api/bookings/send-email", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: { 
+                          "Content-Type": "application/json",
+                          ...getAuthHeaders()
+                        },
                         body: JSON.stringify({
                           to: "zhongwenleng6@gmail.com",
                           customerEmail: bEmail,
                           subject,
                           body,
+                          booking_data: {
+                            resort_name: bResort,
+                            start_date: bDate,
+                            end_date: bDateEnd || bDate,
+                            ski_type: bSkiType,
+                            course_type: 'private',
+                            group_size: bGroupSize,
+                            need_equipment: bEquip === "yes",
+                            skill_level: bLevel,
+                            email: bEmail,
+                            contact_info: { ...bContactVals, phone: bPhone, name: bName },
+                          },
                         }),
                       });
                       if (resp.ok) {
@@ -2923,13 +3095,13 @@ export default function App() {
           </div>
           {regDone ? (
             <div className="text-center py-6">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail size={28} className="text-accent" />
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={28} className="text-green-600" />
               </div>
-              <h3 className="font-black text-foreground text-lg mb-2">{lang === "EN" ? "Check your email!" : "請查收驗證郵件！"}</h3>
-              <p className="text-muted-foreground text-sm mb-1">{lang === "EN" ? "We've sent a verification link to:" : "驗證連結已發送至："}</p>
+              <h3 className="font-black text-foreground text-lg mb-2">{lang === "EN" ? "Registration Successful!" : "註冊成功！"}</h3>
+              <p className="text-muted-foreground text-sm mb-1">{lang === "EN" ? "Your account has been created:" : "您的帳號已建立："}</p>
               <p className="font-semibold text-accent text-sm mb-4">{form.email}</p>
-              <p className="text-muted-foreground text-xs mb-5">{lang === "EN" ? "Please click the link to verify your email, then you can log in." : "請點擊連結完成驗證後即可登入。連結24小時內有效。"}</p>
+              <p className="text-muted-foreground text-xs mb-5">{lang === "EN" ? "You can now log in directly with your email and password." : "現在可以直接使用郵箱和密碼登入了。"}</p>
               <button onClick={() => { setRegDone(false); setShowReg(false); }} className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-accent transition-colors">{tr.close}</button>
             </div>
           ) : (
@@ -3145,6 +3317,131 @@ export default function App() {
       {showReg && <RegisterModal />}
       {showLogin && <LoginModal />}
       {showPayment && payResort && <PaymentModal />}
+      {showOrders && (orderDetail ? (() => {
+        const d = orderDetail;
+        const contactInfo = typeof d.contact_info === 'object' ? d.contact_info : {};
+        const contactStr = Object.entries(contactInfo).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(', ');
+        const canCancel = ['pending', 'paid', 'confirmed'].includes(d.status);
+        const L = (tc: string, en: string) => lang === 'EN' ? en : tc;
+        return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setOrderDetail(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setOrderDetail(null)} className="text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={20} /></button>
+                <h3 className="font-bold text-lg text-foreground">{tr.orderNo}</h3>
+              </div>
+              <button onClick={() => setShowOrders(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
+            </div>
+            {orderDetailLoading ? (
+              <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" /></div>
+            ) : (
+              <div className="p-6 space-y-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{d.order_no}</span>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor[d.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabel(d.status)}</span>
+                </div>
+                {d.photo_url && <div className="rounded-xl overflow-hidden h-40 bg-muted"><img src={d.photo_url} alt={d.resort_name} className="w-full h-full object-cover" /></div>}
+                <div className="space-y-3">
+                  {[
+                    [tr.orderResort, d.resort_name],
+                    [L("地點","Location"), d.location],
+                    [tr.orderDate, `${d.start_date?.slice(0,10)} ~ ${d.end_date?.slice(0,10)}`],
+                    [tr.orderSkiType, d.ski_type === 'ski' ? L("滑雪","Ski") : L("單板","Snowboard")],
+                    [L("課程類型","Course Type"), d.course_type === 'private' ? tr.priv : tr.grp],
+                    [tr.orderGroupSize, `${d.group_size} ${L("人","ppl")}`],
+                    [tr.orderCoach, d.coach_name || L("未指定","Not specified")],
+                    [L("程度","Level"), [L("完全新手","Beginner"), L("初學者","Beginner+"), L("初中階","Intermediate"), L("中高階","Advanced")][d.skill_level] || ''],
+                    [tr.orderEquip, d.need_equipment ? tr.equipYes : tr.equipNo],
+                    [tr.orderContact, contactStr || '-'],
+                    [tr.orderPayMethod, d.payment_method || '-'],
+                    [L("支付狀態","Payment"), d.payment_status === 'success' ? L("已支付","Paid") : L("未支付","Unpaid")],
+                  ].map(([label, val], i) => (
+                    <div key={i} className="flex justify-between items-start text-sm gap-3">
+                      <span className="text-muted-foreground shrink-0 min-w-[80px]">{label}</span>
+                      <span className="font-semibold text-foreground text-right">{val}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-border pt-4 flex justify-between items-center">
+                  <span className="font-bold text-foreground">{tr.orderFee}</span>
+                  <span className="text-xl font-black text-accent">{d.currency} {d.total_amount}</span>
+                </div>
+                {canCancel && (
+                  <button onClick={() => setCancelConfirm(d.order_no)} className="w-full border-2 border-red-200 text-red-500 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
+                    <AlertCircle size={16} />{tr.orderCancel}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        );
+      })() : (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowOrders(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-xl text-foreground flex items-center gap-2"><ClipboardList size={22} className="text-accent" />{tr.myOrders}</h3>
+              <button onClick={() => setShowOrders(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
+            </div>
+            <div className="px-6 py-3 border-b border-border flex gap-2 overflow-x-auto shrink-0">
+              {orderFilterTabs.map(t => (
+                <button key={t.value} onClick={() => setOrderFilter(t.value)} className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${orderFilter === t.value ? 'bg-accent text-white' : 'bg-muted text-muted-foreground hover:text-foreground'}`}>{t.label}</button>
+              ))}
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {ordersLoading ? (
+                <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" /></div>
+              ) : orders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                  <ClipboardList size={48} className="mb-4 opacity-30" /><p className="text-sm">{tr.orderEmpty}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((o: any) => (
+                    <div key={o.order_no} className="border border-border rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="flex gap-4">
+                        {o.photo_url && <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-muted"><img src={o.photo_url} alt={o.resort_name} className="w-full h-full object-cover" /></div>}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h4 className="font-bold text-foreground truncate">{o.resort_name}</h4>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${statusColor[o.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabel(o.status)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-1">{o.order_no}</p>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                            <span>{o.start_date?.slice(0,10)}</span>
+                            <span>{o.ski_type === 'ski' ? '⛷ Ski' : '🏂 Board'}</span>
+                            <span>{o.group_size} {lang === 'EN' ? 'ppl' : '人'}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-sm font-black text-accent">{o.currency} {o.total_amount}</span>
+                            <button onClick={() => fetchOrderDetail(o.order_no)} className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">{tr.orderDetail} <ArrowRight size={12} /></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {cancelConfirm && (
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60" onClick={() => setCancelConfirm(null)}>
+              <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center"><AlertCircle size={20} className="text-red-500" /></div>
+                  <p className="font-bold text-foreground">{tr.orderConfirmCancel}</p>
+                </div>
+                <p className="text-sm text-muted-foreground mb-5 ml-[52px]">{cancelConfirm}</p>
+                <div className="flex gap-3">
+                  <button onClick={() => setCancelConfirm(null)} className="flex-1 border border-border text-foreground font-semibold py-2.5 rounded-xl hover:bg-muted transition-colors">{tr.orderBack}</button>
+                  <button onClick={() => handleCancelOrder(cancelConfirm)} disabled={canceling} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">{canceling ? '...' : tr.orderCancel}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
 
       {/* ── Season floating banner (homepage only) ── */}
       {tab === 0 && showSeasonBanner && (
@@ -3253,7 +3550,28 @@ export default function App() {
                 />
               </div>
               <button
-                onClick={() => { if (email && pwd) { sessionStorage.setItem('_loginEmail', email); setView("login-done"); } }}
+                onClick={async () => {
+                  if (!email || !pwd) return;
+                  try {
+                    const resp = await fetch('/api/auth/login', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email, password: pwd }),
+                    });
+                    const data = await resp.json();
+                    if (data.success && data.data?.token) {
+                      // 保存 JWT token 和用户邮箱到 localStorage
+                      localStorage.setItem('_jwtToken', data.data.token);
+                      localStorage.setItem('_loggedInUser', data.data.user.email);
+                      setLoggedInUser(data.data.user.email);
+                      setShowLogin(false);
+                    } else {
+                      alert(data.message || (lang === 'EN' ? 'Login failed' : '登录失败'));
+                    }
+                  } catch {
+                    alert(lang === 'EN' ? 'Network error' : '网络错误');
+                  }
+                }}
                 disabled={!email || !pwd}
                 className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
@@ -3314,7 +3632,7 @@ export default function App() {
                 <Check size={24} className="text-green-600" />
               </div>
               <p className="font-bold text-foreground mb-4">{L("loginDone")}</p>
-              <button onClick={() => { const e = sessionStorage.getItem('_loginEmail'); if (e) { setLoggedInUser(e); sessionStorage.removeItem('_loginEmail'); } setShowLogin(false); }} className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-accent transition-colors">{tr.close}</button>
+              <button onClick={() => { const e = sessionStorage.getItem('_loginEmail'); if (e) { setLoggedInUser(e); localStorage.setItem('_loggedInUser', e); sessionStorage.removeItem('_loginEmail'); } setShowLogin(false); }} className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-accent transition-colors">{tr.close}</button>
             </div>
           )}
         </div>
@@ -3378,12 +3696,27 @@ export default function App() {
         const customerEmail = contactVals["email"]?.trim() || "";
         const resp = await fetch("/api/bookings/send-email", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...getAuthHeaders()
+          },
           body: JSON.stringify({
             to: "zhongwenleng6@gmail.com",
             customerEmail,
             subject: `[SnowTrip] 新預訂 - ${payResort?.name}`,
             body,
+            booking_data: {
+              resort_name: payResort?.name || '',
+              start_date: startDate,
+              end_date: endDate,
+              ski_type: skiType,
+              course_type: 'private',
+              group_size: groupSize,
+              need_equipment: needEquip === "yes",
+              skill_level: skillLevel ?? 0,
+              email: customerEmail,
+              contact_info: contactVals,
+            },
           }),
         });
         if (resp.ok) {
@@ -3520,9 +3853,19 @@ export default function App() {
     };
 
     const handleClose = () => {
-      setShowPayment(false);
-      setPayStep(1);
-      setPayMethod("");
+      if (payStep === 3) {
+        // Booking success → auto open My Orders
+        setShowPayment(false);
+        setPayStep(1);
+        setPayMethod("");
+        setShowOrders(true);
+        setOrderDetail(null);
+        setOrderFilter("");
+      } else {
+        setShowPayment(false);
+        setPayStep(1);
+        setPayMethod("");
+      }
     };
 
     const skillLevels = [

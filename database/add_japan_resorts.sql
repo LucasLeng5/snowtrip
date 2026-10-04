@@ -1,39 +1,8 @@
 -- ============================================================
--- SnowTrip Seed Data
+-- 添加日本雪场数据
 -- ============================================================
 USE snowtri0817;
-
--- ─── 教练数据 ────────────────────────────────────────────────
-INSERT INTO coaches (name, title_tc, title_en, certifications, languages, experience, photo_url, resorts) VALUES
-('Aster Zhang',  '高級滑雪教練',  'Senior Ski Instructor',  'CSIA Level 4 · CASI Level 3', '中文 · English · 日本語', 12, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop', 'Niseko · Whistler'),
-('Lucas Leng',   '滑雪技術總監',  'Technical Director',     'BASI Level 4 · NZSIA Level 4','English · 廣東話',         15, 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop', 'Queenstown · Cardrona'),
-('井上 健',       '日本雪道專家',  'Japan Terrain Expert',   'SAJ Level 1 · JSIA 公認',     '日本語 · English · 中文',   18, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop', 'Hokkaido · Nagano'),
-('Kenneth Lau',  '粉雪課程主任',  'Powder Course Director', 'CSIA Level 4 · CAA Avalanche','廣東話 · English · 普通話', 10, 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop', 'Niseko · Hakuba'),
-('高橋 翔',       '兒童課程教練',  'Kids Program Coach',     'SAJ Level 2 · PSIA Level 3',  '日本語 · 普通話',           8,  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop', 'Furano · Teine'),
-('Olivia',       '競技滑雪教練',  'Competitive Ski Coach',  'NZSIA Level 4 · FIS Certified','English · 中文',            11, 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop', 'Coronet Peak · The Remarkables');
-
--- ─── 中国雪场 ────────────────────────────────────────────────
-INSERT INTO resorts (name, name_en, location, nation, region, price, currency, photo_url, features) VALUES
-('萬科松花湖滑雪場', 'Vanke Songhua Lake',     '吉林・吉林市',   'CN', '吉林', 888,  'CNY', 'https://images.unsplash.com/photo-1465220183275-1faa863377e3?w=600&h=380&fit=crop', '["雪質優良","現代設施","教學場地"]'),
-('北大湖滑雪場', 'Beidahu Ski Resort',         '吉林・吉林市',   'CN', '吉林', 888,  'CNY', 'https://images.unsplash.com/photo-1680114015093-b1975c470331?w=600&h=380&fit=crop', '["初學者課程","設施齊全","雪道多樣"]'),
-('長白山萬達國際滑雪場', 'Changbaishan Wanda', '吉林・白山市',   'CN', '吉林', 888,  'CNY', 'https://images.unsplash.com/photo-1516352267226-f5f3e4c53781?w=600&h=380&fit=crop', '["國際標準","溫泉度假","高端體驗"]'),
-('亞布力滑雪場', 'Yabuli Ski Resort',         '黑龍江・哈爾濱', 'CN', '黑龙江', 888,  'CNY', 'https://images.unsplash.com/photo-1611279607611-d6dd93331c6e?w=600&h=380&fit=crop', '["東北名山","滑雪歷史","完善配套"]'),
-('萬龍滑雪場', 'Wanlong Ski Resort',           '河北・張家口',   'CN', '河北', 1080, 'CNY', 'https://images.unsplash.com/photo-1673751243582-6d3d33cf136d?w=600&h=380&fit=crop', '["奧運場地","高難度地形","專業課程"]'),
-('太舞滑雪小鎮', 'Thaiwoo Ski Resort',         '河北・張家口',   'CN', '河北', 1080, 'CNY', 'https://images.unsplash.com/photo-1600332303415-5d6a43eef133?w=600&h=380&fit=crop', '["主題滑雪鎮","娛樂配套","親子友善"]'),
-('禾木吉克普林滑雪場', 'Hemu Jikepulin',   '新疆・阿勒泰',   'CN', '新疆', 980,  'CNY', 'https://images.unsplash.com/photo-1600476018895-b66342d8592d?w=600&h=380&fit=crop', '["原始粉雪","異域風情","獨特體驗"]'),
-('可可托海國際滑雪場', 'Koktokay International',   '新疆・阿勒泰',   'CN', '新疆', 980,  'CNY', 'https://images.unsplash.com/photo-1711066444012-f918e6b448d8?w=600&h=380&fit=crop', '["國際認證","自然景觀","探險滑雪"]');
-
--- ─── 纽西兰雪场 ──────────────────────────────────────────────
-INSERT INTO resorts (name, name_en, location, nation, region, price, currency, photo_url, features) VALUES
-('華卡帕帕', 'Whakapapa',    '北島・魯阿佩胡', 'NZ', '北岛', 820, 'NZD', 'https://images.unsplash.com/photo-1598525024848-f2d50bbbfe03?w=600&h=380&fit=crop', '["火山地形","多樣雪道","家庭友善"]'),
-('圖羅瓦',   'Tūroa',        '北島・魯阿佩胡', 'NZ', '北岛', 820, 'NZD', 'https://images.unsplash.com/photo-1551524559-8af4e6624178?w=600&h=380&fit=crop', '["廣闊地形","壯觀景色","高山滑雪"]'),
-('皇冠峰',   'Coronet Peak', '南島・皇后鎮',   'NZ', '南岛', 900, 'NZD', 'https://images.unsplash.com/photo-1600476019922-fb69c71b0b53?w=600&h=380&fit=crop', '["皇后鎮旁","夜滑場地","完善設施"]'),
-('卓越山',   'The Remarkables','南島・皇后鎮', 'NZ', '南岛', 920, 'NZD', 'https://images.unsplash.com/photo-1600476018895-b66342d8592d?w=600&h=380&fit=crop', '["壯麗山景","挑戰地形","攝影勝地"]'),
-('卡德羅納', 'Cardrona',     '南島・瓦納卡',   'NZ', '南岛', 870, 'NZD', 'https://images.unsplash.com/photo-1465220183275-1faa863377e3?w=600&h=380&fit=crop', '["家庭首選","初學者天堂","豐富設施"]'),
-('三錐山',   'Treble Cone',  '南島・瓦納卡',   'NZ', '南岛', 870, 'NZD', 'https://images.unsplash.com/photo-1565992441121-4367c2967103?w=600&h=380&fit=crop', '["高級地形","壯觀視野","小眾體驗"]'),
-('哈特山',   'Mt Hutt',      '南島・坎特伯雷', 'NZ', '南岛', 870, 'NZD', 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=380&fit=crop', '["最長雪季","高山環境","進階課程"]');
-
-
+SET NAMES utf8mb4;
 
 -- ─── 北海道地区 (15个雪场) ──────────────────────────────────
 INSERT INTO resorts (name, name_en, location, nation, region, price, currency, photo_url, features, is_active) VALUES
