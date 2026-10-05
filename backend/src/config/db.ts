@@ -7,12 +7,12 @@ const pool = mysql.createPool({
   port:               Number(process.env.DB_PORT) || 3306,
   user:               process.env.DB_USER     || 'root',
   password:           process.env.DB_PASSWORD || '',
-  database:           process.env.DB_NAME     || 'snowtri0817',
+  database:           process.env.DB_NAME     || 'snowtrip1005',
   waitForConnections: true,
   connectionLimit:    10,
   queueLimit:         0,
   charset:            'utf8mb4',
-  timezone:           '+00:00',
+  timezone:           'local',  // 使用本地时区，与 MySQL NOW() 保持一致
 });
 
 pool.getConnection()

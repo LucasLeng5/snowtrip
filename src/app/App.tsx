@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   Globe, X, Menu, ChevronDown, ChevronLeft, ChevronRight,
   MapPin, Phone, Mail, Clock, Search, ArrowRight, ArrowLeft, Plus, Minus,
-  Check, Star, CreditCard, Smartphone, LogOut, User, ClipboardList, AlertCircle, CheckCircle
+  Check, Star, CreditCard, Smartphone, LogOut, User, ClipboardList, AlertCircle, CheckCircle, Lock
 } from "lucide-react";
 
 // ─── Image imports (ES module — required for Figma Make) ──
@@ -76,7 +76,7 @@ const T = {
     wechat: "微信聯繫", wechatId: "微信 ID：-SkiBum",
     wechatTip: "請在微信中搜索以上 ID 與我們聯繫",
     close: "關閉",
-    myOrders: "我的訂單", orderNo: "訂單號碼", orderResort: "雪場", orderDate: "上課日期",
+    myOrders: "我的訂單", orderNo: "訂單號碼", orderDetailTitle: "訂單詳情", orderResort: "雪場", orderDate: "上課日期",
     orderSkiType: "滑雪種類", orderGroupSize: "人數", orderFee: "課程費用", orderStatus: "訂單狀態",
     orderDetail: "查看詳情", orderCancel: "取消訂單", orderBack: "返回", orderAll: "全部",
     orderPending: "待付款", orderPaid: "已付款", orderConfirmed: "已確認", orderCompleted: "已完成", orderCancelled: "已取消",
@@ -115,7 +115,7 @@ const T = {
     wechat: "微信联系", wechatId: "微信 ID：-SkiBum",
     wechatTip: "请在微信中搜索以上 ID 与我们联系",
     close: "关闭",
-    myOrders: "我的订单", orderNo: "订单号码", orderResort: "雪场", orderDate: "上课日期",
+    myOrders: "我的订单", orderNo: "订单号码", orderDetailTitle: "订单详情", orderResort: "雪场", orderDate: "上课日期",
     orderSkiType: "滑雪种类", orderGroupSize: "人数", orderFee: "课程费用", orderStatus: "订单状态",
     orderDetail: "查看详情", orderCancel: "取消订单", orderBack: "返回", orderAll: "全部",
     orderPending: "待付款", orderPaid: "已付款", orderConfirmed: "已确认", orderCompleted: "已完成", orderCancelled: "已取消",
@@ -154,7 +154,7 @@ const T = {
     wechat: "WeChat Contact", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "Search the above ID in WeChat to contact us",
     close: "Close",
-    myOrders: "My Orders", orderNo: "Order No.", orderResort: "Resort", orderDate: "Course Dates",
+    myOrders: "My Orders", orderNo: "Order No.", orderDetailTitle: "Order Details", orderResort: "Resort", orderDate: "Course Dates",
     orderSkiType: "Ski Type", orderGroupSize: "Group Size", orderFee: "Course Fee", orderStatus: "Status",
     orderDetail: "View Details", orderCancel: "Cancel Order", orderBack: "Back", orderAll: "All",
     orderPending: "Pending", orderPaid: "Paid", orderConfirmed: "Confirmed", orderCompleted: "Completed", orderCancelled: "Cancelled",
@@ -193,7 +193,7 @@ const T = {
     wechat: "WeChatで連絡", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "WeChatで上記IDを検索してお問い合わせください",
     close: "閉じる",
-    myOrders: "マイオーダー", orderNo: "注文番号", orderResort: "ゲレンデ", orderDate: "レッスン日",
+    myOrders: "マイオーダー", orderNo: "注文番号", orderDetailTitle: "注文詳細", orderResort: "ゲレンデ", orderDate: "レッスン日",
     orderSkiType: "スキー種類", orderGroupSize: "人数", orderFee: "レッスン料金", orderStatus: "ステータス",
     orderDetail: "詳細を見る", orderCancel: "キャンセル", orderBack: "戻る", orderAll: "すべて",
     orderPending: "未払い", orderPaid: "支払い済み", orderConfirmed: "確認済み", orderCompleted: "完了", orderCancelled: "キャンセル済",
@@ -232,7 +232,7 @@ const T = {
     wechat: "WeChat 연락", wechatId: "WeChat ID: -SkiBum",
     wechatTip: "WeChat에서 위 ID를 검색하여 문의해 주세요",
     close: "닫기",
-    myOrders: "내 주문", orderNo: "주문번호", orderResort: "스키장", orderDate: "강습 날짜",
+    myOrders: "내 주문", orderNo: "주문번호", orderDetailTitle: "주문 상세", orderResort: "스키장", orderDate: "강습 날짜",
     orderSkiType: "스키 유형", orderGroupSize: "인원", orderFee: "강습 요금", orderStatus: "주문 상태",
     orderDetail: "상세 보기", orderCancel: "주문 취소", orderBack: "뒤로", orderAll: "전체",
     orderPending: "미결제", orderPaid: "결제완료", orderConfirmed: "확인됨", orderCompleted: "완료", orderCancelled: "취소됨",
@@ -854,6 +854,18 @@ export default function App() {
   const [showWeChat, setShowWeChat] = useState(false);
   const [contactSent, setContactSent] = useState(false);
   const [regDone, setRegDone] = useState(false);
+  const [regEmail, setRegEmail] = useState("");
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifySuccess, setVerifySuccess] = useState(true);
+  const [verifyMessage, setVerifyMessage] = useState("");
+  const [verifyCountdown, setVerifyCountdown] = useState(3);
+  // 重置密码状态
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [resetResult, setResetResult] = useState<{ success: boolean; message: string } | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const [showSeasonBanner, setShowSeasonBanner] = useState(true);
   const [showMobileForm, setShowMobileForm] = useState(false);
@@ -1024,26 +1036,53 @@ export default function App() {
     const { tab: initTab, region: initRegion } = parsePath();
     setTab(initTab);
     if (initRegion) setActiveRegion(initRegion);
-    window.history.replaceState({ tab: initTab }, "", window.location.pathname);
 
-    // ── Handle email verification from URL ──
-    const urlParams = new URLSearchParams(window.location.search);
+    // ── Handle email verification from URL (必须在 replaceState 之前读取参数) ──
+    const initialPathname = window.location.pathname;
+    const initialSearch = window.location.search;
+    const urlParams = new URLSearchParams(initialSearch);
     const verifyToken = urlParams.get('token');
-    if (window.location.pathname.includes('verify-email') && verifyToken) {
+
+    // 清除 URL 中的参数
+    window.history.replaceState({ tab: initTab }, "", initialPathname);
+
+    if (initialPathname.includes('verify-email') && verifyToken) {
       fetch(`/api/auth/verify-email?token=${encodeURIComponent(verifyToken)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            alert(data.message || '邮箱验证成功！现在可以登录了。');
-            // 清除 URL 中的 token 参数
-            window.history.replaceState({}, '', '/');
+            setVerifySuccess(true);
+            setVerifyMessage(data.message || '邮箱验证成功！');
+            setShowVerifyModal(true);
+            // 倒计时 3 秒后跳转到登录
+            let count = 3;
+            setVerifyCountdown(count);
+            const timer = setInterval(() => {
+              count--;
+              setVerifyCountdown(count);
+              if (count <= 0) {
+                clearInterval(timer);
+                setShowVerifyModal(false);
+                setShowLogin(true);
+              }
+            }, 1000);
           } else {
-            alert(data.message || '验证失败，请重新注册或联系客服。');
+            setVerifySuccess(false);
+            setVerifyMessage(data.message || '验证失败，请重新注册或联系客服。');
+            setShowVerifyModal(true);
           }
         })
         .catch(() => {
-          alert('网络错误，请稍后重试。');
+          setVerifySuccess(false);
+          setVerifyMessage('网络错误，请稍后重试。');
+          setShowVerifyModal(true);
         });
+    }
+
+    // ── Handle reset password from URL ──
+    if (initialPathname.includes('reset-password') && verifyToken) {
+      setResetToken(verifyToken);
+      setShowResetModal(true);
     }
 
     return () => window.removeEventListener("popstate", onPopState);
@@ -2086,26 +2125,26 @@ export default function App() {
                     const isNZ = activeRegion === "NZ";
                     const MONTHS_CFG = isNZ
                       ? [
-                          { label: "6月",  year: 2026, month: 5  },
-                          { label: "7月",  year: 2026, month: 6  },
-                          { label: "8月",  year: 2026, month: 7  },
-                          { label: "9月",  year: 2026, month: 8  },
-                          { label: "10月", year: 2026, month: 9  },
+                          { label: "6月",  year: 2027, month: 5  },
+                          { label: "7月",  year: 2027, month: 6  },
+                          { label: "8月",  year: 2027, month: 7  },
+                          { label: "9月",  year: 2027, month: 8  },
+                          { label: "10月", year: 2027, month: 9  },
                         ]
                       : [
-                          { label: "11月", year: 2025, month: 10 },
-                          { label: "12月", year: 2025, month: 11 },
-                          { label: "1月",  year: 2026, month: 0  },
-                          { label: "2月",  year: 2026, month: 1  },
-                          { label: "3月",  year: 2026, month: 2  },
-                          { label: "4月",  year: 2026, month: 3  },
+                          { label: "11月", year: 2026, month: 10 },
+                          { label: "12月", year: 2026, month: 11 },
+                          { label: "1月",  year: 2027, month: 0  },
+                          { label: "2月",  year: 2027, month: 1  },
+                          { label: "3月",  year: 2027, month: 2  },
+                          { label: "4月",  year: 2027, month: 3  },
                         ];
                     const isPeak = (y: number, m: number, d: number) => isNZ
-                      ? (y === 2026 && m === 7 && d >= 1 && d <= 15)   // NZ: early Aug school holidays
-                      : (y === 2025 && m === 11 && d >= 20) ||          // Christmas
-                        (y === 2026 && m === 0  && d <= 5)  ||          // New Year
-                        (y === 2026 && m === 0  && d >= 17 && d <= 27) || // CNY
-                        (y === 2026 && m === 1  && d >= 11 && d <= 17); // Winter break
+                      ? (y === 2027 && m === 7 && d >= 1 && d <= 15)   // NZ: early Aug school holidays
+                      : (y === 2026 && m === 11 && d >= 20) ||          // Christmas
+                        (y === 2027 && m === 0  && d <= 5)  ||          // New Year
+                        (y === 2027 && m === 1  && d >= 1 && d <= 14) || // CNY (Feb 6, 2027)
+                        (y === 2027 && m === 1  && d >= 11 && d <= 17); // Winter break
                     const safeIdx = Math.min(bCalMonth, MONTHS_CFG.length - 1);
                     const cfg = MONTHS_CFG[safeIdx];
                     const firstDow = new Date(cfg.year, cfg.month, 1).getDay();
@@ -3077,7 +3116,10 @@ export default function App() {
           body: JSON.stringify({ nickname: form.nick, phone: form.phone, email: form.email, password: form.pwd, lang }),
         });
         const data = await res.json();
-        if (data.success) { setRegDone(true); }
+        if (data.success) { 
+          setRegEmail(form.email);
+          setRegDone(true); 
+        }
         else { setError(data.message || (lang === "EN" ? "Registration failed" : "註冊失敗，請重試")); }
       } catch {
         // 後端不可用時：前端模擬成功流程
@@ -3095,13 +3137,13 @@ export default function App() {
           </div>
           {regDone ? (
             <div className="text-center py-6">
-              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={28} className="text-green-600" />
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail size={28} className="text-blue-600" />
               </div>
               <h3 className="font-black text-foreground text-lg mb-2">{lang === "EN" ? "Registration Successful!" : "註冊成功！"}</h3>
-              <p className="text-muted-foreground text-sm mb-1">{lang === "EN" ? "Your account has been created:" : "您的帳號已建立："}</p>
-              <p className="font-semibold text-accent text-sm mb-4">{form.email}</p>
-              <p className="text-muted-foreground text-xs mb-5">{lang === "EN" ? "You can now log in directly with your email and password." : "現在可以直接使用郵箱和密碼登入了。"}</p>
+              <p className="text-muted-foreground text-sm mb-1">{lang === "EN" ? "A verification email has been sent to:" : "驗證郵件已發送至："}</p>
+              <p className="font-semibold text-accent text-sm mb-4">{regEmail}</p>
+              <p className="text-muted-foreground text-xs mb-5">{lang === "EN" ? "Please check your inbox and click the verification link to activate your account. (Valid for 24 hours)" : "請檢查您的郵箱，點擊驗證連結以激活帳號。（24小時內有效）"}</p>
               <button onClick={() => { setRegDone(false); setShowReg(false); }} className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-accent transition-colors">{tr.close}</button>
             </div>
           ) : (
@@ -3135,7 +3177,7 @@ export default function App() {
   // ─── FLOATING CONTACTS ─────────────────────────────────
   const FloatingContacts = () => (
     <>
-      <div className="fixed bottom-36 right-5 z-40 flex flex-col gap-3">
+      <div className="fixed bottom-20 right-5 z-40 flex flex-col gap-3">
         {/* WhatsApp */}
         <a
           href="https://wa.me/85252986913"
@@ -3290,7 +3332,7 @@ export default function App() {
         </div>
       </div>
       <div className="border-t border-white/10 py-4 px-4">
-        <p className="text-center text-white/30 text-xs">© 2025 SnowTrip International. All rights reserved.</p>
+        <p className="text-center text-white/30 text-xs">© 2026 SnowTrip International. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -3315,6 +3357,115 @@ export default function App() {
       <Footer />
       <FloatingContacts />
       {showReg && <RegisterModal />}
+            {showVerifyModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-primary/70 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-7 relative text-center">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${verifySuccess ? 'bg-green-50' : 'bg-red-50'}`}>
+                    {verifySuccess ? <CheckCircle size={28} className="text-green-600" /> : <AlertCircle size={28} className="text-red-600" />}
+                  </div>
+                  <h3 className="font-black text-foreground text-lg mb-2">
+                    {verifySuccess ? '郵箱驗證成功！' : '驗證失敗'}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4">{verifyMessage}</p>
+                  {verifySuccess && (
+                    <p className="text-accent font-bold text-2xl mb-4">{verifyCountdown}</p>
+                  )}
+                  <p className="text-muted-foreground text-xs">
+                    {verifySuccess ? '秒後跳轉到登入頁面...' : '請重新註冊或聯繫客服。'}
+                  </p>
+                </div>
+              </div>
+            )}
+      {/* 重置密码弹窗 */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-primary/70 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-7 relative">
+            <button onClick={() => { setShowResetModal(false); window.history.replaceState({}, '', '/'); }} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+              <X size={20} />
+            </button>
+
+            {!resetResult ? (
+              <>
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Lock size={28} className="text-accent" />
+                </div>
+                <h3 className="font-black text-foreground text-lg mb-2 text-center">設置新密碼</h3>
+                <p className="text-muted-foreground text-sm mb-5 text-center">請輸入您的新密碼（至少 8 位）</p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground mb-1">新密碼</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="至少 8 位字符"
+                      className="w-full border border-border rounded-lg px-3 py-2.5 text-sm bg-input-background focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground mb-1">確認密碼</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="再次輸入新密碼"
+                      className="w-full border border-border rounded-lg px-3 py-2.5 text-sm bg-input-background focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      if (newPassword.length < 8) {
+                        setResetResult({ success: false, message: '密碼長度至少 8 位' });
+                        return;
+                      }
+                      if (newPassword !== confirmPassword) {
+                        setResetResult({ success: false, message: '兩次輸入的密碼不一致' });
+                        return;
+                      }
+                      setResetSubmitting(true);
+                      try {
+                        const resp = await fetch("/api/auth/reset-password", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ token: resetToken, password: newPassword }),
+                        });
+                        const data = await resp.json();
+                        setResetResult({ success: data.success, message: data.message || (data.success ? '密碼重置成功！' : '重置失敗') });
+                      } catch {
+                        setResetResult({ success: false, message: '網絡錯誤，請稍後重試' });
+                      } finally {
+                        setResetSubmitting(false);
+                      }
+                    }}
+                    disabled={resetSubmitting || !newPassword || !confirmPassword}
+                    className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {resetSubmitting ? "提交中..." : "確認重置密碼"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-2">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${resetResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+                  {resetResult.success ? <CheckCircle size={28} className="text-green-600" /> : <AlertCircle size={28} className="text-red-600" />}
+                </div>
+                <h3 className="font-black text-foreground text-lg mb-2">
+                  {resetResult.success ? '密碼重置成功！' : '重置失敗'}
+                </h3>
+                <p className="text-muted-foreground text-sm mb-5">{resetResult.message}</p>
+                <button
+                  onClick={() => { setShowResetModal(false); window.history.replaceState({}, '', '/'); if (resetResult.success) setShowLogin(true); }}
+                  className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-accent transition-colors"
+                >
+                  {resetResult.success ? '前往登入' : '返回首頁'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {showLogin && <LoginModal />}
       {showPayment && payResort && <PaymentModal />}
       {showOrders && (orderDetail ? (() => {
@@ -3329,7 +3480,7 @@ export default function App() {
             <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <div className="flex items-center gap-3">
                 <button onClick={() => setOrderDetail(null)} className="text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={20} /></button>
-                <h3 className="font-bold text-lg text-foreground">{tr.orderNo}</h3>
+                <h3 className="font-bold text-lg text-foreground">{tr.orderDetailTitle}</h3>
               </div>
               <button onClick={() => setShowOrders(false)} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
             </div>
@@ -3353,6 +3504,7 @@ export default function App() {
                     [tr.orderCoach, d.coach_name || L("未指定","Not specified")],
                     [L("程度","Level"), [L("完全新手","Beginner"), L("初學者","Beginner+"), L("初中階","Intermediate"), L("中高階","Advanced")][d.skill_level] || ''],
                     [tr.orderEquip, d.need_equipment ? tr.equipYes : tr.equipNo],
+                    [L("電子郵箱","Email"), d.user_email || '-'],
                     [tr.orderContact, contactStr || '-'],
                     [tr.orderPayMethod, d.payment_method || '-'],
                     [L("支付狀態","Payment"), d.payment_status === 'success' ? L("已支付","Paid") : L("未支付","Unpaid")],
@@ -3425,23 +3577,25 @@ export default function App() {
               )}
             </div>
           </div>
-          {cancelConfirm && (
-            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60" onClick={() => setCancelConfirm(null)}>
-              <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center"><AlertCircle size={20} className="text-red-500" /></div>
-                  <p className="font-bold text-foreground">{tr.orderConfirmCancel}</p>
-                </div>
-                <p className="text-sm text-muted-foreground mb-5 ml-[52px]">{cancelConfirm}</p>
-                <div className="flex gap-3">
-                  <button onClick={() => setCancelConfirm(null)} className="flex-1 border border-border text-foreground font-semibold py-2.5 rounded-xl hover:bg-muted transition-colors">{tr.orderBack}</button>
-                  <button onClick={() => handleCancelOrder(cancelConfirm)} disabled={canceling} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">{canceling ? '...' : tr.orderCancel}</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       ))}
+
+      {/* 取消确认弹窗 - 移到三元运算符外面,确保在订单详情和订单列表都能显示 */}
+      {cancelConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60" onClick={() => setCancelConfirm(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center"><AlertCircle size={20} className="text-red-500" /></div>
+              <p className="font-bold text-foreground">{tr.orderConfirmCancel}</p>
+            </div>
+            <p className="text-sm text-muted-foreground mb-5 ml-[52px]">{cancelConfirm}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setCancelConfirm(null)} className="flex-1 border border-border text-foreground font-semibold py-2.5 rounded-xl hover:bg-muted transition-colors">{tr.orderBack}</button>
+              <button onClick={() => handleCancelOrder(cancelConfirm)} disabled={canceling} className="flex-1 bg-red-500 text-white font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">{canceling ? '...' : tr.orderCancel}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Season floating banner (homepage only) ── */}
       {tab === 0 && showSeasonBanner && (
@@ -3488,6 +3642,8 @@ export default function App() {
     // view: "login" | "forgot" | "reset-sent" | "login-done"
     const [view, setView] = useState<"login" | "forgot" | "reset-sent" | "login-done">("login");
     const [resetEmail, setResetEmail] = useState("");
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetError, setResetError] = useState("");
 
     const loginLabels = {
       title:      { TC:"登录", SC:"登录", EN:"Login", JP:"ログイン", KR:"로그인" },
@@ -3599,12 +3755,34 @@ export default function App() {
                 />
               </div>
               <button
-                onClick={() => { if (resetEmail) setView("reset-sent"); }}
-                disabled={!resetEmail}
+                onClick={async () => {
+                  if (!resetEmail) return;
+                  setResetLoading(true);
+                  setResetError("");
+                  try {
+                    const resp = await fetch("/api/auth/forgot-password", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email: resetEmail }),
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                      setView("reset-sent");
+                    } else {
+                      setResetError(data.message || "发送失败，请重试");
+                    }
+                  } catch (err) {
+                    setResetError("网络错误，请检查连接后重试");
+                  } finally {
+                    setResetLoading(false);
+                  }
+                }}
+                disabled={!resetEmail || resetLoading}
                 className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {L("sendReset")}
+                {resetLoading ? "發送中..." : L("sendReset")}
               </button>
+              {resetError && <p className="text-red-500 text-xs text-center">{resetError}</p>}
               <button onClick={() => setView("login")} className="w-full text-muted-foreground text-sm hover:text-foreground transition-colors">
                 ← {L("backLogin")}
               </button>

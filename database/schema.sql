@@ -3,8 +3,8 @@
 -- MySQL 8.0+
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS snowtri0817 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE snowtri0817;
+CREATE DATABASE IF NOT EXISTS snowtrip1005 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE snowtrip1005;
 
 -- ─── 用户表 ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (

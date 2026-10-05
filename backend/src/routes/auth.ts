@@ -36,22 +36,51 @@ router.post('/register', [
     // 加密密码
     const hash = await bcrypt.hash(password, 12);
 
-    // 写入数据库(is_verified = 1, 开发环境跳过邮件验证)
+    // 写入数据库(is_verified = 0, 需要邮件验证)
     const [result] = await pool.execute(
-      'INSERT INTO users (nickname, email, phone, password_hash, lang, is_verified) VALUES (?, ?, ?, ?, ?, 1)',
+      'INSERT INTO users (nickname, email, phone, password_hash, lang, is_verified) VALUES (?, ?, ?, ?, ?, 0)',
       [nickname, email, phone, hash, lang]
     );
     const userId = (result as any).insertId;
 
-    // TODO: 生产环境需要发送邮件验证
-    // const verifyToken = uuidv4();
-    // const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    // const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verifyToken}`;
-    // await sendMail(email, '【SnowTrip】請驗證您的電子郵箱', ...);
+    // 生成验证令牌并发送邮件
+    const verifyToken = uuidv4();
+    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小时有效
+    await pool.execute(
+      'UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?',
+      [verifyToken, verifyExpires, userId]
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
+    const isEN = lang === 'EN';
+    
+    console.log(`[注册] 发送验证邮件至：${email}, 验证链接：${verifyUrl}`);
+    
+    try {
+      await sendMail(
+        email,
+        isEN ? '[SnowTrip] Please Verify Your Email' : '【SnowTrip】請驗證您的電子郵箱',
+        isEN 
+          ? `Welcome to SnowTrip!\n\nPlease click the link below to verify your email (valid for 24 hours):\n${verifyUrl}\n\nIf you did not register, please ignore this email.`
+          : `歡迎加入 SnowTrip！\n\n請點擊以下連結驗證您的電子郵箱（24小時內有效）：\n${verifyUrl}\n\n如非本人操作，請忽略此郵件。`,
+        `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
+          <h2 style="color:#0b1929;border-bottom:2px solid #0ea5e9;padding-bottom:8px">${isEN ? '🎿 Email Verification' : ' 郵箱驗證'}</h2>
+          <p style="font-size:15px;line-height:1.8;color:#333">${isEN ? 'Welcome to SnowTrip! Please verify your email by clicking the button below:' : '歡迎加入 SnowTrip！請點擊下方按鈕驗證您的電子郵箱：'}</p>
+          <div style="text-align:center;margin:24px 0"><a href="${verifyUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold">${isEN ? 'Verify Email' : '驗證郵箱'}</a></div>
+          <p style="font-size:12px;color:#888;word-break:break-all">${isEN ? 'Or copy this link:' : '或複製此連結：'} ${verifyUrl}</p>
+          <p style="font-size:12px;color:#888">${isEN ? 'This link expires in 24 hours.' : '此連結24小時內有效。'}</p>
+        </div>`
+      );
+      console.log(`[注册] 验证邮件发送成功：${email}`);
+    } catch (mailErr) {
+      console.error(`[注册] 验证邮件发送失败：${email}`, mailErr);
+      // 邮件发送失败不阻止注册成功，但记录错误
+    }
 
     res.status(201).json({
       success: true,
-      message: '註冊成功！現在可以直接登入了(開發環境已跳過郵件驗證)。',
+      message: isEN ? 'Registration successful! Please check your email to verify your account.' : '註冊成功！請檢查您的郵箱以驗證帳號。',
       data: { userId, email }
     });
   } catch (err) {
@@ -195,21 +224,38 @@ router.post('/forgot-password', [
       const user = (rows as any[])[0];
       const token = uuidv4();
       const expires = new Date(Date.now() + 30 * 60 * 1000);
+      // 先删除旧的未使用记录，避免 UNIQUE 约束冲突
+      await pool.execute('DELETE FROM password_resets WHERE email = ? AND used = 0', [email]);
       await pool.execute(
-        'INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)',
+        'INSERT INTO password_resets (email, token, expires_at, used) VALUES (?, ?, ?, 0)',
         [email, token, expires]
       );
       const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-      await sendMail(
-        email,
-        '【SnowTrip】重置密碼',
-        `您好 ${user.nickname}，\n\n請點擊以下連結重置密碼（30分鐘內有效）：\n${resetUrl}`,
-        `<p>您好 <strong>${user.nickname}</strong>，</p>
-         <p>請點擊 <a href="${resetUrl}">此連結</a> 重置您的密碼（30分鐘內有效）。</p>`
-      );
+      console.log(`[重置密码] 发送重置邮件至：${email}, 重置链接：${resetUrl}`);
+      try {
+        await sendMail(
+          email,
+          '【SnowTrip】重置密碼',
+          `您好 ${user.nickname}，\n\n請點擊以下連結重置密碼（30分鐘內有效）：\n${resetUrl}`,
+          `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
+            <h2 style="color:#0b1929;border-bottom:2px solid #0ea5e9;padding-bottom:8px">🔑 密碼重置</h2>
+            <p style="font-size:15px;line-height:1.8;color:#333">您好 <strong>${user.nickname}</strong>，</p>
+            <p style="font-size:15px;line-height:1.8;color:#333">請點擊下方按鈕重置您的密碼（30分鐘內有效）：</p>
+            <div style="text-align:center;margin:24px 0"><a href="${resetUrl}" style="display:inline-block;background:#0ea5e9;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold">重置密碼</a></div>
+            <p style="font-size:12px;color:#888;word-break:break-all">或複製此連結：${resetUrl}</p>
+            <p style="font-size:12px;color:#888">此連結30分鐘內有效。如非本人操作，請忽略此郵件。</p>
+          </div>`
+        );
+        console.log(`[重置密码] 重置邮件发送成功：${email}`);
+      } catch (mailErr) {
+        console.error(`[重置密码] 重置邮件发送失败：${email}`, mailErr);
+      }
+    } else {
+      console.log(`[重置密码] 邮箱未找到或未验证：${email}`);
     }
     res.json({ success: true, message: '如郵箱已驗證，重置連結已發送至您的郵箱' });
   } catch (err) {
+    console.error('[重置密码] 错误:', err);
     res.status(500).json({ success: false, message: '伺服器錯誤' });
   }
 });

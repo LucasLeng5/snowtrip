@@ -1,7 +1,7 @@
 -- ============================================================
 -- SnowTrip Seed Data
 -- ============================================================
-USE snowtri0817;
+USE snowtrip1005;
 
 -- ─── 教练数据 ────────────────────────────────────────────────
 INSERT INTO coaches (name, title_tc, title_en, certifications, languages, experience, photo_url, resorts) VALUES

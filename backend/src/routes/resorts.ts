@@ -6,7 +6,9 @@ const router = Router();
 // ─── 获取所有雪场 GET /api/resorts ───────────────────────────
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   const { nation, search, page = '1', limit = '20' } = req.query;
-  const offset = (Number(page) - 1) * Number(limit);
+  const pageNum = Math.max(1, parseInt(String(page)) || 1);
+  const limitNum = Math.max(1, Math.min(100, parseInt(String(limit)) || 20));
+  const offset = (pageNum - 1) * limitNum;
 
   try {
     let sql = 'SELECT * FROM resorts WHERE is_active = 1';
@@ -22,8 +24,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       params.push(q, q, q);
     }
 
-    sql += ' ORDER BY nation, price ASC LIMIT ? OFFSET ?';
-    params.push(Number(limit), offset);
+    sql += ` ORDER BY nation, price ASC LIMIT ${limitNum} OFFSET ${offset}`;
 
     const [rows] = await pool.execute(sql, params);
     const resorts = (rows as any[]).map(r => ({
@@ -38,7 +39,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     const [countRows] = await pool.execute(countSql, countParams);
     const total = (countRows as any[])[0].total;
 
-    res.json({ success: true, data: resorts, pagination: { total, page: Number(page), limit: Number(limit) } });
+    res.json({ success: true, data: resorts, pagination: { total, page: pageNum, limit: limitNum } });
   } catch (err) {
     console.error('获取雪场失败:', err);
     res.status(500).json({ success: false, message: '服务器错误' });

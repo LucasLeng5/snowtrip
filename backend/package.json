@@ -7,8 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "db:schema": "mysql -u root -p snowtri0817 < ../database/schema.sql",
-    "db:seed": "mysql -u root -p snowtri0817 < ../database/seed.sql"
+    "db:schema": "mysql -u root -p snowtrip1005 < ../database/schema.sql",
+    "db:seed": "mysql -u root -p snowtrip1005 < ../database/seed.sql"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

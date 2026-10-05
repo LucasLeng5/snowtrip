@@ -224,10 +224,8 @@ router.post('/send-email', [
     <p style="color:#888;font-size:12px;margin-top:16px">此郵件由 SnowTrip 預訂系統自動發送</p>
   </div>`;
 
-  // Build list of recipients: admin + customer
-  const recipients: { to: string; subject: string; text: string; html: string }[] = [
-    { to, subject, text, html: htmlContent },
-  ];
+  // Build list of recipients: only customer (no admin email)
+  const recipients: { to: string; subject: string; text: string; html: string }[] = [];
 
   if (customerEmail && typeof customerEmail === 'string' && customerEmail.trim()) {
     recipients.push({

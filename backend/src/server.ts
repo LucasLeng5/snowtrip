@@ -26,7 +26,13 @@ app.use(cors({
 
 // ─── 请求限流（防止暴力攻击）────────────────────────────────
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { success: false, message: '请求过于频繁，请15分钟后重试' } });
+const authLimiter = rateLimit({ 
+  windowMs: 15 * 60 * 1000, 
+  max: 10, 
+  message: { success: false, message: '请求过于频繁，请 15 分钟后重试' },
+  // 排除邮箱验证接口，避免用户点击验证链接时被限流
+  skip: (req) => req.path === '/verify-email'
+});
 app.use(limiter);
 app.use('/api/auth', authLimiter);
 
