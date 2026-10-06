@@ -69,7 +69,7 @@ router.post('/', authenticate, [
         (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
          start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, total_amount, currency, notes, status,
          form_email, user_email, resort_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         order_no, req.user!.id, resort_id, coach_id || null,
         ski_type, group_size, course_type,
@@ -464,7 +464,7 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
         (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
          start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, total_amount, currency, notes, status,
          form_email, user_email, resort_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         order_no, userId, resort.id, bookingData.coach_id || null,
         bookingData.ski_type || 'ski',
