@@ -440,7 +440,12 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
     const total_amount = price * days;
     const order_no = genOrderNo();
 
-    const contact_info = JSON.stringify(bookingData.contact_info || {});
+    // 合并 contact_info 和 equipment_sets
+    const contactInfo = bookingData.contact_info || {};
+    if (bookingData.equipment_sets && Array.isArray(bookingData.equipment_sets)) {
+      contactInfo.equipment_sets = bookingData.equipment_sets;
+    }
+    const contact_info = JSON.stringify(contactInfo);
 
     await pool.execute(
       `INSERT INTO bookings

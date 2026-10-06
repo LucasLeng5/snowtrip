@@ -84,6 +84,7 @@ const T = {
     orderCoach: "教練", orderEquip: "租借裝備", orderContact: "聯絡方式", orderPayMethod: "支付方式",
     equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
     orderFormEmail: "預約郵箱", orderUserEmail: "註冊郵箱",
+    orderEquipDetail: "租借裝備明細", equipSet: "套裝",
   },
   SC: {
     nav: ["主页","预订","授课雪场","滑雪攻略","常见问题","联系我们"],
@@ -124,6 +125,7 @@ const T = {
     orderCoach: "教练", orderEquip: "租借装备", orderContact: "联系方式", orderPayMethod: "支付方式",
     equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
     orderFormEmail: "预约邮箱", orderUserEmail: "注册邮箱",
+    orderEquipDetail: "租借装备明细", equipSet: "套装",
   },
   EN: {
     nav: ["Home","Booking","Teaching Resorts","Ski Guide","FAQ","Contact Us"],
@@ -164,6 +166,7 @@ const T = {
     orderCoach: "Coach", orderEquip: "Equipment", orderContact: "Contact", orderPayMethod: "Payment",
     equipYes: "Yes", equipNo: "No", orderLevel: "Level",
     orderFormEmail: "Booking Email", orderUserEmail: "Registered Email",
+    orderEquipDetail: "Equipment Details", equipSet: "Set",
   },
   JP: {
     nav: ["ホーム","予約","レッスンゲレンデ","スキーガイド","よくある質問","お問い合わせ"],
@@ -204,6 +207,7 @@ const T = {
     orderCoach: "コーチ", orderEquip: "装備レンタル", orderContact: "連絡先", orderPayMethod: "支払い方法",
     equipYes: "必要", equipNo: "不要", orderLevel: "レベル",
     orderFormEmail: "予約メール", orderUserEmail: "登録メール",
+    orderEquipDetail: "装備詳細", equipSet: "セット",
   },
   KR: {
     nav: ["홈","예약","강습 스키장","스키 가이드","자주 묻는 질문","문의하기"],
@@ -244,6 +248,7 @@ const T = {
     orderCoach: "코치", orderEquip: "장비 렌탈", orderContact: "연락처", orderPayMethod: "결제 방법",
     equipYes: "필요", equipNo: "불필요", orderLevel: "레벨",
     orderFormEmail: "예약 이메일", orderUserEmail: "등록 이메일",
+    orderEquipDetail: "장비 세부사항", equipSet: "세트",
   },
 } as const;
 
@@ -2667,6 +2672,14 @@ export default function App() {
                             skill_level: bLevel,
                             email: bEmail,
                             contact_info: { ...bContactVals, phone: bPhone, name: bName },
+                            // 装备明细
+                            equipment_sets: bEquipSets.map(s => ({
+                              items: s.items,
+                              gender: s.gender,
+                              height: s.height,
+                              weight: s.weight,
+                              shoe_size: `${s.shoeSize} ${bShoeSizeSystem}`
+                            })),
                           },
                         }),
                       });
@@ -3520,6 +3533,24 @@ export default function App() {
                       <span className="font-semibold text-foreground text-right">{val}</span>
                     </div>
                   ))}
+                  {/* 装备明细 */}
+                  {d.need_equipment && contactInfo.equipment_sets && contactInfo.equipment_sets.length > 0 && (
+                    <div className="border-t border-border pt-4 mt-2">
+                      <h4 className="font-bold text-sm mb-3">{tr.orderEquipDetail}</h4>
+                      {contactInfo.equipment_sets.map((set: any, idx: number) => (
+                        <div key={idx} className="bg-muted/50 rounded-lg p-3 mb-2 last:mb-0">
+                          <div className="text-xs font-semibold text-muted-foreground mb-2">{tr.equipSet} {idx + 1}</div>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            <div><span className="text-muted-foreground">{L("項目","Items")}: </span><span className="font-medium">{Array.isArray(set.items) ? set.items.join(', ') : '-'}</span></div>
+                            <div><span className="text-muted-foreground">{L("性別","Gender")}: </span><span className="font-medium">{set.gender === 'M' ? L("男","Male") : set.gender === 'F' ? L("女","Female") : '-'}</span></div>
+                            <div><span className="text-muted-foreground">{L("身高","Height")}: </span><span className="font-medium">{set.height || '-'}</span></div>
+                            <div><span className="text-muted-foreground">{L("體重","Weight")}: </span><span className="font-medium">{set.weight || '-'}</span></div>
+                            <div><span className="text-muted-foreground">{L("鞋碼","Shoe Size")}: </span><span className="font-medium">{set.shoe_size || '-'}</span></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="border-t border-border pt-4 flex justify-between items-center">
                   <span className="font-bold text-foreground">{tr.orderFee}</span>
