@@ -452,9 +452,12 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
     const total_amount = price * days;
     const order_no = genOrderNo();
 
-    // 分离 contact_info 和 equipment_sets
     const contactInfo = { ...bookingData.contact_info };
     const equipmentSets = bookingData.equipment_sets || null;
+    
+    console.log('DEBUG: contact_info type:', typeof contactInfo);
+    console.log('DEBUG: contact_info:', contactInfo);
+    console.log('DEBUG: contact_info.email:', contactInfo.email);
     
     const contact_info = JSON.stringify(contactInfo);
     const equipment_sets = equipmentSets ? JSON.stringify(equipmentSets) : null;
