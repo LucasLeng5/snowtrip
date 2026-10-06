@@ -206,6 +206,9 @@ router.post('/send-email', [
   }
   const { to, subject, body: text, customerEmail, booking_data } = req.body;
 
+  console.log('[DEBUG send-email] customerEmail:', customerEmail);
+  console.log('[DEBUG send-email] booking_data.email:', booking_data?.email);
+
   // 尝试获取登录用户信息（可选）
   let authUserId: number | null = null;
   let authUserEmail: string | null = null;
@@ -266,6 +269,10 @@ router.post('/send-email', [
     // 优先使用表单填写的邮箱，其次使用登录用户的邮箱
     const formEmail = customerEmail || booking_data.email || '';
     const userEmail = authUserEmail || formEmail;
+    
+    console.log('[DEBUG createBooking] formEmail:', formEmail);
+    console.log('[DEBUG createBooking] userEmail:', userEmail);
+    
     bookingResult = await createBookingFromEmail(pool, booking_data, formEmail, userEmail, authUserId);
   }
 
@@ -484,6 +491,7 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
     );
 
     console.log(`订单创建成功: ${order_no}, 用户ID: ${userId}, 雪场ID: ${resort.id}, 表单邮箱: ${formEmail}, 用户邮箱: ${userEmail}, 雪场名称: ${resort.name}`);
+    console.log('[DEBUG INSERT] formEmail value:', formEmail, 'type:', typeof formEmail);
     return { order_no, total_amount, currency: resort.currency, status: 'confirmed' };
   } catch (err) {
     console.error('创建订单记录失败:', err);
