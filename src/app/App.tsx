@@ -2690,7 +2690,7 @@ export default function App() {
                   const onCopyAndLine = () => {
                     const text = buildSummary();
                     navigator.clipboard.writeText(text).catch(() => {});
-                    window.open("https://line.me/ti/p/Bx89uz4R9g", "_blank");
+                    window.open("https://lin.ee/6rXdbbt", "_blank");
                   };
 
                   return (
@@ -3206,7 +3206,7 @@ export default function App() {
 
         {/* LINE */}
         <a
-          href="https://line.me/ti/p/Bx89uz4R9g"
+          href="https://lin.ee/6rXdbbt"
           target="_blank"
           rel="noopener noreferrer"
           title="LINE"
@@ -3284,7 +3284,7 @@ export default function App() {
               </svg>
             </a>
             {/* LINE */}
-            <a href="https://line.me/ti/p/Bx89uz4R9g" target="_blank" rel="noopener noreferrer" aria-label="LINE"
+            <a href="https://lin.ee/6rXdbbt" target="_blank" rel="noopener noreferrer" aria-label="LINE"
               className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: "#00B900" }}>
               <svg viewBox="0 0 24 24" width="17" height="17" fill="white">
