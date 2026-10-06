@@ -83,6 +83,7 @@ const T = {
     orderEmpty: "暫無訂單", orderConfirmCancel: "確認取消此訂單？", orderCancelSuccess: "訂單已取消",
     orderCoach: "教練", orderEquip: "租借裝備", orderContact: "聯絡方式", orderPayMethod: "支付方式",
     equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
+    orderFormEmail: "預約郵箱", orderUserEmail: "註冊郵箱",
   },
   SC: {
     nav: ["主页","预订","授课雪场","滑雪攻略","常见问题","联系我们"],
@@ -122,6 +123,7 @@ const T = {
     orderEmpty: "暂无订单", orderConfirmCancel: "确认取消此订单？", orderCancelSuccess: "订单已取消",
     orderCoach: "教练", orderEquip: "租借装备", orderContact: "联系方式", orderPayMethod: "支付方式",
     equipYes: "需要", equipNo: "不需要", orderLevel: "程度",
+    orderFormEmail: "预约邮箱", orderUserEmail: "注册邮箱",
   },
   EN: {
     nav: ["Home","Booking","Teaching Resorts","Ski Guide","FAQ","Contact Us"],
@@ -161,6 +163,7 @@ const T = {
     orderEmpty: "No orders yet", orderConfirmCancel: "Cancel this order?", orderCancelSuccess: "Order cancelled",
     orderCoach: "Coach", orderEquip: "Equipment", orderContact: "Contact", orderPayMethod: "Payment",
     equipYes: "Yes", equipNo: "No", orderLevel: "Level",
+    orderFormEmail: "Booking Email", orderUserEmail: "Registered Email",
   },
   JP: {
     nav: ["ホーム","予約","レッスンゲレンデ","スキーガイド","よくある質問","お問い合わせ"],
@@ -200,6 +203,7 @@ const T = {
     orderEmpty: "注文がありません", orderConfirmCancel: "この注文をキャンセルしますか？", orderCancelSuccess: "注文をキャンセルしました",
     orderCoach: "コーチ", orderEquip: "装備レンタル", orderContact: "連絡先", orderPayMethod: "支払い方法",
     equipYes: "必要", equipNo: "不要", orderLevel: "レベル",
+    orderFormEmail: "予約メール", orderUserEmail: "登録メール",
   },
   KR: {
     nav: ["홈","예약","강습 스키장","스키 가이드","자주 묻는 질문","문의하기"],
@@ -239,6 +243,7 @@ const T = {
     orderEmpty: "주문이 없습니다", orderConfirmCancel: "이 주문을 취소하시겠습니까?", orderCancelSuccess: "주문이 취소되었습니다",
     orderCoach: "코치", orderEquip: "장비 렌탈", orderContact: "연락처", orderPayMethod: "결제 방법",
     equipYes: "필요", equipNo: "불필요", orderLevel: "레벨",
+    orderFormEmail: "예약 이메일", orderUserEmail: "등록 이메일",
   },
 } as const;
 
@@ -3177,7 +3182,7 @@ export default function App() {
   // ─── FLOATING CONTACTS ─────────────────────────────────
   const FloatingContacts = () => (
     <>
-      <div className="fixed bottom-20 right-5 z-40 flex flex-col gap-3">
+      <div className="fixed bottom-28 right-5 z-40 flex flex-col gap-3">
         {/* WhatsApp */}
         <a
           href="https://wa.me/85252986913"
@@ -3504,7 +3509,8 @@ export default function App() {
                     [tr.orderCoach, d.coach_name || L("未指定","Not specified")],
                     [L("程度","Level"), [L("完全新手","Beginner"), L("初學者","Beginner+"), L("初中階","Intermediate"), L("中高階","Advanced")][d.skill_level] || ''],
                     [tr.orderEquip, d.need_equipment ? tr.equipYes : tr.equipNo],
-                    [L("電子郵箱","Email"), d.user_email || '-'],
+                    [tr.orderFormEmail, d.form_email || '-'],
+                    [tr.orderUserEmail, d.user_email || '-'],
                     [tr.orderContact, contactStr || '-'],
                     [tr.orderPayMethod, d.payment_method || '-'],
                     [L("支付狀態","Payment"), d.payment_status === 'success' ? L("已支付","Paid") : L("未支付","Unpaid")],

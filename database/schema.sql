@@ -80,7 +80,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   status        ENUM('pending','paid','confirmed','cancelled','refunded') DEFAULT 'pending',
   notes         TEXT         DEFAULT NULL,
   -- 冗余字段（方便查询，避免 JOIN）
-  user_email    VARCHAR(128) DEFAULT NULL COMMENT '用户邮箱（冗余）',
+  form_email    VARCHAR(128) DEFAULT NULL COMMENT '预约表单填写的邮箱',
+  user_email    VARCHAR(128) DEFAULT NULL COMMENT '用户注册邮箱（冗余）',
   resort_name   VARCHAR(128) DEFAULT NULL COMMENT '雪场名称（冗余）',
   created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -92,6 +93,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   INDEX idx_status    (status),
   INDEX idx_start_date(start_date),
   INDEX idx_user_email (user_email),
+  INDEX idx_form_email (form_email),
   INDEX idx_resort_name (resort_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

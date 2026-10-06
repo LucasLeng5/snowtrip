@@ -110,12 +110,13 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
       sql += ' AND b.status = ?'; 
       params.push(status); 
     }
-    // 使用字符串插值避免 prepared statement 的 LIMIT/OFFSET 问题
-    sql += ` ORDER BY b.created_at DESC LIMIT ${limitNum} OFFSET ${offsetNum}`;
+    sql += ' ORDER BY b.created_at DESC LIMIT ? OFFSET ?';
+    params.push(limitNum, offsetNum);
     
     console.log(`SQL: ${sql}, Params:`, params);
 
-    const [rows] = await pool.execute(sql, params);
+    // 尝试使用 query 而不是 execute,避免 prepared statement 的问题
+    const [rows] = await pool.query(sql, params);
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('获取预订列表失败:', err);
@@ -250,32 +251,25 @@ router.post('/send-email', [
   // 如果提供了 booking_data，同时创建订单记录
   let bookingResult = null;
   if (booking_data && booking_data.resort_name && booking_data.start_date) {
-    console.log('📝 开始创建订单:', {
-      authUserId,
-      authUserEmail,
-      customerEmail,
-      resort_name: booking_data.resort_name,
-      start_date: booking_data.start_date
-    });
     // 优先使用表单填写的邮箱，其次使用登录用户的邮箱
-    const lookupEmail = customerEmail || booking_data.email || authUserEmail || '';
-    bookingResult = await createBookingFromEmail(pool, booking_data, lookupEmail, authUserId);
-    console.log('📝 订单创建结果:', bookingResult);
+    const formEmail = customerEmail || booking_data.email || '';
+    const userEmail = authUserEmail || formEmail;
+    bookingResult = await createBookingFromEmail(pool, booking_data, formEmail, userEmail, authUserId);
   }
 
   res.json({ success: true, results, booking: bookingResult });
 });
 
 // ─── 辅助：根据邮件请求同时创建订单记录 ─────────────────
-async function createBookingFromEmail(pool: any, bookingData: any, userEmail: string, authUserId?: number | null): Promise<any> {
+async function createBookingFromEmail(pool: any, bookingData: any, formEmail: string, userEmail: string, authUserId?: number | null): Promise<any> {
   try {
     // 查找或创建用户
     let userId = authUserId || null;
     
-    // 如果没有提供认证用户 ID，则通过邮箱查找或创建
-    if (!userId && userEmail) {
+    // 如果没有提供认证用户 ID，则通过表单邮箱查找或创建
+    if (!userId && formEmail) {
       const [userRows] = await pool.execute(
-        'SELECT id FROM users WHERE email = ?', [userEmail]
+        'SELECT id FROM users WHERE email = ?', [formEmail]
       );
       if ((userRows as any[]).length > 0) {
         userId = (userRows as any[])[0].id;
@@ -284,7 +278,7 @@ async function createBookingFromEmail(pool: any, bookingData: any, userEmail: st
         const tempPassword = await bcrypt.hash('temp123456', 10);
         const [result] = await pool.execute(
           'INSERT INTO users (nickname, email, phone, password_hash, is_verified) VALUES (?, ?, ?, ?, 1)',
-          [bookingData.contact_info.name, userEmail, bookingData.contact_info.phone || '', tempPassword]
+          [bookingData.contact_info.name, formEmail, bookingData.contact_info.phone || '', tempPassword]
         );
         userId = (result as any).insertId;
       }
@@ -452,8 +446,8 @@ async function createBookingFromEmail(pool: any, bookingData: any, userEmail: st
       `INSERT INTO bookings
         (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
          start_date, end_date, need_equipment, skill_level, contact_info, total_amount, currency, notes, status,
-         user_email, resort_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         form_email, user_email, resort_name)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         order_no, userId, resort.id, bookingData.coach_id || null,
         bookingData.ski_type || 'ski',
@@ -466,12 +460,13 @@ async function createBookingFromEmail(pool: any, bookingData: any, userEmail: st
         total_amount, resort.currency || 'JPY',
         bookingData.notes || null,
         'confirmed',
+        formEmail,
         userEmail,
         resort.name
       ]
     );
 
-    console.log(`订单创建成功: ${order_no}, 用户ID: ${userId}, 雪场ID: ${resort.id}, 用户邮箱: ${userEmail}, 雪场名称: ${resort.name}`);
+    console.log(`订单创建成功: ${order_no}, 用户ID: ${userId}, 雪场ID: ${resort.id}, 表单邮箱: ${formEmail}, 用户邮箱: ${userEmail}, 雪场名称: ${resort.name}`);
     return { order_no, total_amount, currency: resort.currency, status: 'confirmed' };
   } catch (err) {
     console.error('创建订单记录失败:', err);
