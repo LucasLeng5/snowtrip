@@ -110,13 +110,12 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response): Promise<v
       sql += ' AND b.status = ?'; 
       params.push(status); 
     }
-    sql += ' ORDER BY b.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limitNum, offsetNum);
+    // 使用字符串插值避免 prepared statement 的 LIMIT/OFFSET 问题
+    sql += ` ORDER BY b.created_at DESC LIMIT ${limitNum} OFFSET ${offsetNum}`;
     
     console.log(`SQL: ${sql}, Params:`, params);
 
-    // 尝试使用 query 而不是 execute,避免 prepared statement 的问题
-    const [rows] = await pool.query(sql, params);
+    const [rows] = await pool.execute(sql, params);
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error('获取预订列表失败:', err);
@@ -251,9 +250,17 @@ router.post('/send-email', [
   // 如果提供了 booking_data，同时创建订单记录
   let bookingResult = null;
   if (booking_data && booking_data.resort_name && booking_data.start_date) {
+    console.log('📝 开始创建订单:', {
+      authUserId,
+      authUserEmail,
+      customerEmail,
+      resort_name: booking_data.resort_name,
+      start_date: booking_data.start_date
+    });
     // 优先使用表单填写的邮箱，其次使用登录用户的邮箱
     const lookupEmail = customerEmail || booking_data.email || authUserEmail || '';
     bookingResult = await createBookingFromEmail(pool, booking_data, lookupEmail, authUserId);
+    console.log('📝 订单创建结果:', bookingResult);
   }
 
   res.json({ success: true, results, booking: bookingResult });
