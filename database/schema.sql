@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   need_equipment TINYINT(1)  DEFAULT 0,
   skill_level   TINYINT      NOT NULL COMMENT '0=完全新手 1=初学者 2=初中阶 3=中高阶',
   contact_info  JSON         NOT NULL COMMENT '{"whatsapp":"...","line":"...","wechat":"...","email":"..."}',
+  equipment_sets JSON        DEFAULT NULL COMMENT '租借装备明细数组',
   total_amount  DECIMAL(10,2) NOT NULL,
   currency      VARCHAR(10)  NOT NULL,
   status        ENUM('pending','paid','confirmed','cancelled','refunded') DEFAULT 'pending',

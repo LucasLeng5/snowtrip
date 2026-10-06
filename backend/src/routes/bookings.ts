@@ -440,17 +440,17 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
     const total_amount = price * days;
     const order_no = genOrderNo();
 
-    // 合并 contact_info 和 equipment_sets
-    const contactInfo = bookingData.contact_info || {};
-    if (bookingData.equipment_sets && Array.isArray(bookingData.equipment_sets)) {
-      contactInfo.equipment_sets = bookingData.equipment_sets;
-    }
+    // 分离 contact_info 和 equipment_sets
+    const contactInfo = { ...bookingData.contact_info };
+    const equipmentSets = bookingData.equipment_sets || null;
+    
     const contact_info = JSON.stringify(contactInfo);
+    const equipment_sets = equipmentSets ? JSON.stringify(equipmentSets) : null;
 
     await pool.execute(
       `INSERT INTO bookings
         (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
-         start_date, end_date, need_equipment, skill_level, contact_info, total_amount, currency, notes, status,
+         start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, total_amount, currency, notes, status,
          form_email, user_email, resort_name)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -462,6 +462,7 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
         bookingData.need_equipment ? 1 : 0,
         bookingData.skill_level ?? 0,
         contact_info,
+        equipment_sets,
         total_amount, resort.currency || 'JPY',
         bookingData.notes || null,
         'confirmed',

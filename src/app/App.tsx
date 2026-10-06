@@ -3489,7 +3489,8 @@ export default function App() {
       {showOrders && (orderDetail ? (() => {
         const d = orderDetail;
         const contactInfo = typeof d.contact_info === 'object' ? d.contact_info : {};
-        const contactStr = Object.entries(contactInfo).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join(', ');
+        const equipmentSets = d.equipment_sets || [];
+        const contactStr = Object.entries(contactInfo).filter(([, v]) => v && !Array.isArray(v)).map(([k, v]) => `${k}: ${v}`).join(', ');
         const canCancel = ['pending', 'paid', 'confirmed'].includes(d.status);
         const L = (tc: string, en: string) => lang === 'EN' ? en : tc;
         return (
@@ -3534,10 +3535,10 @@ export default function App() {
                     </div>
                   ))}
                   {/* 装备明细 */}
-                  {d.need_equipment && contactInfo.equipment_sets && contactInfo.equipment_sets.length > 0 && (
+                  {d.need_equipment && equipmentSets.length > 0 && (
                     <div className="border-t border-border pt-4 mt-2">
                       <h4 className="font-bold text-sm mb-3">{tr.orderEquipDetail}</h4>
-                      {contactInfo.equipment_sets.map((set: any, idx: number) => (
+                      {equipmentSets.map((set: any, idx: number) => (
                         <div key={idx} className="bg-muted/50 rounded-lg p-3 mb-2 last:mb-0">
                           <div className="text-xs font-semibold text-muted-foreground mb-2">{tr.equipSet} {idx + 1}</div>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
