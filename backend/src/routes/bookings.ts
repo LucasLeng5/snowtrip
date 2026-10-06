@@ -35,20 +35,27 @@ router.post('/', authenticate, [
 
   const {
     resort_id, coach_id, ski_type, group_size, course_type,
-    start_date, end_date, need_equipment, skill_level, contact_info, notes
+    start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, notes
   } = req.body;
 
   try {
-    // 获取雪场价格
+    // 获取雪场信息和用户邮箱
     const [resortRows] = await pool.execute(
-      'SELECT price, currency FROM resorts WHERE id = ? AND is_active = 1',
+      'SELECT price, currency, name FROM resorts WHERE id = ? AND is_active = 1',
       [resort_id]
     );
     if ((resortRows as any[]).length === 0) {
       res.status(404).json({ success: false, message: '雪场不存在' });
       return;
     }
-    const { price, currency } = (resortRows as any[])[0];
+    const { price, currency, name: resortName } = (resortRows as any[])[0];
+
+    // 获取用户邮箱
+    const [userRows] = await pool.execute(
+      'SELECT email FROM users WHERE id = ?',
+      [req.user!.id]
+    );
+    const userEmail = (userRows as any[]).length > 0 ? (userRows as any[])[0].email : null;
 
     // 计算天数与总价
     const days = Math.max(1, Math.ceil(
@@ -60,14 +67,19 @@ router.post('/', authenticate, [
     const [result] = await pool.execute(
       `INSERT INTO bookings
         (order_no, user_id, resort_id, coach_id, ski_type, group_size, course_type,
-         start_date, end_date, need_equipment, skill_level, contact_info, total_amount, currency, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, total_amount, currency, notes, status,
+         form_email, user_email, resort_name)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         order_no, req.user!.id, resort_id, coach_id || null,
         ski_type, group_size, course_type,
         start_date, end_date, need_equipment ? 1 : 0,
         skill_level, JSON.stringify(contact_info),
-        total_amount, currency, notes || null
+        equipment_sets ? JSON.stringify(equipment_sets) : null,
+        total_amount, currency, notes || null, 'pending',
+        contact_info.email || null,
+        userEmail,
+        resortName
       ]
     );
 
