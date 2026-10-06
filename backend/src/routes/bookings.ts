@@ -251,8 +251,8 @@ router.post('/send-email', [
   // 如果提供了 booking_data，同时创建订单记录
   let bookingResult = null;
   if (booking_data && booking_data.resort_name && booking_data.start_date) {
-    // 优先使用登录用户的邮箱，其次使用表单填写的邮箱
-    const lookupEmail = authUserEmail || customerEmail || booking_data.email || '';
+    // 优先使用表单填写的邮箱，其次使用登录用户的邮箱
+    const lookupEmail = customerEmail || booking_data.email || authUserEmail || '';
     bookingResult = await createBookingFromEmail(pool, booking_data, lookupEmail, authUserId);
   }
 
