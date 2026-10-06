@@ -2671,7 +2671,7 @@ export default function App() {
                             need_equipment: bEquip === "yes",
                             skill_level: bLevel,
                             email: bEmail,
-                            contact_info: { ...bContactVals, phone: bPhone, name: bName },
+                            contact_info: { ...bContactVals, phone: bPhone, name: bName, email: bEmail },
                             // 装备明细
                             equipment_sets: bEquipSets.map(s => ({
                               items: s.items,
