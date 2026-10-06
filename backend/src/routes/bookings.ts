@@ -35,7 +35,7 @@ router.post('/', authenticate, [
 
   const {
     resort_id, coach_id, ski_type, group_size, course_type,
-    start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, notes
+    start_date, end_date, need_equipment, skill_level, contact_info, equipment_sets, email, notes
   } = req.body;
 
   try {
@@ -77,7 +77,7 @@ router.post('/', authenticate, [
         skill_level, JSON.stringify(contact_info),
         equipment_sets ? JSON.stringify(equipment_sets) : null,
         total_amount, currency, notes || null, 'pending',
-        contact_info.email || null,
+        email || null,
         userEmail,
         resortName
       ]
@@ -454,10 +454,6 @@ async function createBookingFromEmail(pool: any, bookingData: any, formEmail: st
 
     const contactInfo = { ...bookingData.contact_info };
     const equipmentSets = bookingData.equipment_sets || null;
-    
-    console.log('DEBUG: contact_info type:', typeof contactInfo);
-    console.log('DEBUG: contact_info:', contactInfo);
-    console.log('DEBUG: contact_info.email:', contactInfo.email);
     
     const contact_info = JSON.stringify(contactInfo);
     const equipment_sets = equipmentSets ? JSON.stringify(equipmentSets) : null;
