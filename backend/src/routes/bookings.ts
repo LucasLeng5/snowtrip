@@ -267,9 +267,11 @@ router.post('/send-email', [
   let bookingResult = null;
   if (booking_data && booking_data.resort_name && booking_data.start_date) {
     // 优先使用表单填写的邮箱，其次使用登录用户的邮箱
-    const formEmail = customerEmail || booking_data.email || '';
+    const formEmail = (customerEmail && customerEmail.trim()) ? customerEmail.trim() : (booking_data.email || '');
     const userEmail = authUserEmail || formEmail;
     
+    console.log('[DEBUG createBooking] customerEmail:', customerEmail);
+    console.log('[DEBUG createBooking] booking_data.email:', booking_data.email);
     console.log('[DEBUG createBooking] formEmail:', formEmail);
     console.log('[DEBUG createBooking] userEmail:', userEmail);
     
