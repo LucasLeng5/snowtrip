@@ -1857,13 +1857,26 @@ export default function App() {
             <p className="text-xs font-bold tracking-[0.18em] uppercase text-muted-foreground mb-4">
               {isEN ? "Locations" : isSC ? "可选雪场" : "可選雪場"}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {rd.locs.map((loc, i) => (
-                <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
-                  {loc}
-                </span>
-              ))}
-            </div>
+            {activeRegion === "JP" ? (
+              /* Japan: categorized by sub-region */
+              <div className="space-y-3">
+                {Object.entries(JP_SUB_REGIONS_MAP[lang]).map(([region, resorts]) => (
+                  <div key={region}>
+                    <span className="text-sm font-bold text-foreground">{region}：</span>
+                    <span className="text-sm text-muted-foreground">{resorts.join(isEN ? ", " : "、")}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* NZ / CN: flat list */
+              <div className="flex flex-wrap gap-2">
+                {rd.locs.map((loc, i) => (
+                  <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
+                    {loc}
+                  </span>
+                ))}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground mt-4">
               {isEN
                 ? "* Not included: lift passes, equipment rental, travel insurance."
