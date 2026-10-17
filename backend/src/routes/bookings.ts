@@ -239,8 +239,8 @@ router.post('/send-email', [
     <p style="color:#888;font-size:12px;margin-top:16px">此郵件由 SnowTrip 預訂系統自動發送</p>
   </div>`;
 
-  // Build list of recipients: customer + admin
-  const ADMIN_EMAIL = '361891452@qq.com';
+  // Build list of recipients: customer + admins
+  const ADMIN_EMAILS = ['361891452@qq.com', 'youngski.snowtrip@gmail.com'];
   const recipients: { to: string; subject: string; text: string; html: string }[] = [];
 
   // 管理员通知邮件
@@ -251,7 +251,9 @@ router.post('/send-email', [
     <pre style="background:#f8f9fa;padding:16px;border-radius:8px;font-size:14px;line-height:1.8;white-space:pre-wrap">${text}</pre>
     <p style="color:#888;font-size:12px;margin-top:16px">此郵件由 SnowTrip 預訂系統自動發送</p>
   </div>`;
-  recipients.push({ to: ADMIN_EMAIL, subject: adminSubject, text: adminText, html: adminHtml });
+  ADMIN_EMAILS.forEach(email => {
+    recipients.push({ to: email, subject: adminSubject, text: adminText, html: adminHtml });
+  });
 
   // 客戶確認郵件
   if (customerEmail && typeof customerEmail === 'string' && customerEmail.trim()) {
