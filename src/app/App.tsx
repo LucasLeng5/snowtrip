@@ -1858,12 +1858,18 @@ export default function App() {
               {isEN ? "Locations" : isSC ? "可选雪场" : "可選雪場"}
             </p>
             {activeRegion === "JP" ? (
-              /* Japan: categorized by sub-region */
-              <div className="space-y-3">
+              /* Japan: categorized by sub-region with button style */
+              <div className="space-y-4">
                 {Object.entries(JP_SUB_REGIONS_MAP[lang]).map(([region, resorts]) => (
                   <div key={region}>
-                    <span className="text-sm font-bold text-foreground">{region}：</span>
-                    <span className="text-sm text-muted-foreground">{resorts.join(isEN ? ", " : "、")}</span>
+                    <p className="text-sm font-bold text-foreground mb-2">{region}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {resorts.map((r, i) => (
+                        <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
+                          {r}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
