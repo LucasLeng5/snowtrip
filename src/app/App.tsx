@@ -1852,46 +1852,6 @@ export default function App() {
             </div>
           </section>
 
-          {/* Locations */}
-          <section className="mb-12 border-t border-border pt-10">
-            <p className="text-xs font-bold tracking-[0.18em] uppercase text-muted-foreground mb-4">
-              {isEN ? "Locations" : isSC ? "可选雪场" : "可選雪場"}
-            </p>
-            {activeRegion === "JP" ? (
-              /* Japan: categorized by sub-region with button style */
-              <div className="space-y-4">
-                {Object.entries(JP_SUB_REGIONS_MAP[lang]).map(([region, resorts]) => (
-                  <div key={region}>
-                    <p className="text-sm font-bold text-foreground mb-2">{region}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {resorts.map((r, i) => (
-                        <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
-                          {r}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* NZ / CN: flat list */
-              <div className="flex flex-wrap gap-2">
-                {rd.locs.map((loc, i) => (
-                  <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
-                    {loc}
-                  </span>
-                ))}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-4">
-              {isEN
-                ? "* Not included: lift passes, equipment rental, travel insurance."
-                : isSC
-                ? "* 費用不含：缆车票、装备租借、旅游保险。"
-                : "* 費用不含：纜車票、裝備租借、旅遊保險。"}
-            </p>
-          </section>
-
           {/* Pricing tables */}
           <section className="mb-12 border-t border-border pt-10">
             <p className="text-xs font-bold tracking-[0.18em] uppercase text-muted-foreground mb-6">
@@ -1946,6 +1906,46 @@ export default function App() {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* Locations */}
+          <section className="mb-12 border-t border-border pt-10">
+            <p className="text-xs font-bold tracking-[0.18em] uppercase text-muted-foreground mb-4">
+              {isEN ? "Locations" : isSC ? "可选雪场" : "可選雪場"}
+            </p>
+            {activeRegion === "JP" ? (
+              /* Japan: categorized by sub-region with button style */
+              <div className="space-y-4">
+                {Object.entries(JP_SUB_REGIONS_MAP[lang]).map(([region, resorts]) => (
+                  <div key={region}>
+                    <p className="text-sm font-bold text-foreground mb-2">{region}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {resorts.map((r, i) => (
+                        <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* NZ / CN: flat list */
+              <div className="flex flex-wrap gap-2">
+                {rd.locs.map((loc, i) => (
+                  <span key={i} className="text-xs border border-border px-3 py-1.5 rounded-full text-foreground font-medium">
+                    {loc}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-4">
+              {isEN
+                ? "* Not included: lift passes, equipment rental, travel insurance."
+                : isSC
+                ? "* 費用不含：缆车票、装备租借、旅游保险。"
+                : "* 費用不含：纜車票、裝備租借、旅遊保險。"}
+            </p>
           </section>
 
           {/* Testimonials */}
