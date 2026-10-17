@@ -239,9 +239,21 @@ router.post('/send-email', [
     <p style="color:#888;font-size:12px;margin-top:16px">此郵件由 SnowTrip 預訂系統自動發送</p>
   </div>`;
 
-  // Build list of recipients: only customer (no admin email)
+  // Build list of recipients: customer + admin
+  const ADMIN_EMAIL = '361891452@qq.com';
   const recipients: { to: string; subject: string; text: string; html: string }[] = [];
 
+  // 管理员通知邮件
+  const adminSubject = isEN_subject(subject) ? `New Booking Request - SnowTrip` : `新預約請求 - SnowTrip`;
+  const adminText = `收到新的滑雪課程預約請求：\n\n${text}`;
+  const adminHtml = `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #eee;border-radius:12px">
+    <h2 style="color:#0b1929;border-bottom:2px solid #0ea5e9;padding-bottom:8px">🎿 SnowTrip 新預訂通知</h2>
+    <pre style="background:#f8f9fa;padding:16px;border-radius:8px;font-size:14px;line-height:1.8;white-space:pre-wrap">${text}</pre>
+    <p style="color:#888;font-size:12px;margin-top:16px">此郵件由 SnowTrip 預訂系統自動發送</p>
+  </div>`;
+  recipients.push({ to: ADMIN_EMAIL, subject: adminSubject, text: adminText, html: adminHtml });
+
+  // 客戶確認郵件
   if (customerEmail && typeof customerEmail === 'string' && customerEmail.trim()) {
     recipients.push({
       to: customerEmail.trim(),

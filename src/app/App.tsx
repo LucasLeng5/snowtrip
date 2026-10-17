@@ -2599,40 +2599,40 @@ export default function App() {
                 {/* CTA buttons */}
                 {(() => {
                   const buildSummary = () => {
-                    const regionLabel = activeRegion === "JP" ? (isEN ? "Japan" : "日本") : activeRegion === "NZ" ? (isEN ? "New Zealand" : "纽西兰") : (isEN ? "China" : "中国");
-                    const typeLabel = bSkiType === "ski" ? (isEN ? "Ski (双板)" : "双板 Ski") : bSkiType === "snowboard" ? (isEN ? "Snowboard (单板)" : "单板 Snowboard") : "—";
-                    const durationLabel = bDuration === "3h" ? (isEN ? "3h Half Day" : "3小时半日课") : bDuration === "6h" ? (isEN ? "6h Full Day" : "6小时全日课") : "—";
+                    const regionLabel = activeRegion === "JP" ? (isEN ? "Japan" : "日本") : activeRegion === "NZ" ? (isEN ? "New Zealand" : isSC ? "纽西兰" : "紐西蘭") : (isEN ? "China" : isSC ? "中国" : "中國");
+                    const typeLabel = bSkiType === "ski" ? (isEN ? "Ski (双板)" : isSC ? "双板 Ski" : "雙板 Ski") : bSkiType === "snowboard" ? (isEN ? "Snowboard (单板)" : isSC ? "单板 Snowboard" : "單板 Snowboard") : "—";
+                    const durationLabel = bDuration === "3h" ? (isEN ? "3h Half Day" : isSC ? "3小时半日课" : "3小時半日課") : bDuration === "6h" ? (isEN ? "6h Full Day" : isSC ? "6小时全日课" : "6小時全日課") : "—";
                     const levelLabel = bLevel ? `L${bLevel}` : "—";
                     const dateLabel = bDate ? (bDateEnd ? `${bDate} → ${bDateEnd}` : bDate) : "—";
                     const lines = [
-                      isEN ? "=== Ski Lesson Booking Request ===" : "=== 滑雪预约请求 ===",
+                      isEN ? "=== Ski Lesson Booking Request ===" : isSC ? "=== 滑雪预约请求 ===" : "=== 滑雪預約請求 ===",
                       "",
-                      `${isEN ? "Name" : "姓名"}：${bName || "—"}`,
-                      `${isEN ? "Email" : "邮箱"}：${bEmail || "—"}`,
-                      `${isEN ? "Region" : "地区"}：${regionLabel}`,
-                      `${isEN ? "Resort" : "雪场"}：${bResort || "—"}`,
-                      `${isEN ? "Board Type" : "器材类型"}：${typeLabel}`,
-                      `${isEN ? "Group Size" : "人数"}：${bGroupSize}${isEN ? " person(s)" : "人"}`,
-                      `${isEN ? "Duration" : "课时"}：${durationLabel}`,
-                      `${isEN ? "Date" : "日期"}：${dateLabel}`,
-                      `${isEN ? "Skill Level" : "程度"}：${levelLabel}`,
-                      `${isEN ? "Equipment Rental" : "租借装备"}：${bEquip === "yes" ? (isEN ? "Yes" : "是") : bEquip === "no" ? (isEN ? "No" : "否") : "—"}`,
+                      `${isEN ? "Name" : isSC ? "姓名" : "姓名"}：${bName || "—"}`,
+                      `${isEN ? "Email" : isSC ? "邮箱" : "郵箱"}：${bEmail || "—"}`,
+                      `${isEN ? "Region" : isSC ? "地区" : "地區"}：${regionLabel}`,
+                      `${isEN ? "Resort" : isSC ? "雪场" : "雪場"}：${bResort || "—"}`,
+                      `${isEN ? "Board Type" : isSC ? "器材类型" : "器材類型"}：${typeLabel}`,
+                      `${isEN ? "Group Size" : isSC ? "人数" : "人數"}：${bGroupSize}${isEN ? " person(s)" : isSC ? "人" : "人"}`,
+                      `${isEN ? "Duration" : isSC ? "课时" : "課時"}：${durationLabel}`,
+                      `${isEN ? "Date" : isSC ? "日期" : "日期"}：${dateLabel}`,
+                      `${isEN ? "Skill Level" : isSC ? "程度" : "程度"}：${levelLabel}`,
+                      `${isEN ? "Equipment Rental" : isSC ? "租借装备" : "租借裝備"}：${bEquip === "yes" ? (isEN ? "Yes" : isSC ? "是" : "是") : bEquip === "no" ? (isEN ? "No" : isSC ? "否" : "否") : "—"}`,
                     ];
                     if (bEquip === "yes" && bEquipSets.length > 0) {
                       bEquipSets.forEach((s, i) => {
                         const gLabel = s.gender === "M" ? (isEN ? "Male" : "男") : s.gender === "F" ? (isEN ? "Female" : "女") : "—";
-                        lines.push(`${isEN ? `Equipment Set ${i+1}` : `装备第${i+1}套`}：${gLabel}，${isEN ? "H" : "身高"}${s.height}cm，${isEN ? "W" : "体重"}${s.weight}kg，${isEN ? "Shoe" : "鞋码"}${s.shoeSize}，${s.items.join("、")}`);
+                        lines.push(`${isEN ? `Equipment Set ${i+1}` : isSC ? `装备第${i+1}套` : `裝備第${i+1}套`}：${gLabel}，${isEN ? "H" : isSC ? "身高" : "身高"}${s.height}cm，${isEN ? "W" : isSC ? "体重" : "體重"}${s.weight}kg，${isEN ? "Shoe" : isSC ? "鞋码" : "鞋碼"}${s.shoeSize}，${s.items.join("、")}`);
                       });
                     }
                     const contactEntries = Object.entries(bContactVals).filter(([, v]) => v);
                     if (contactEntries.length > 0) {
                       lines.push("");
-                      lines.push(isEN ? "Contact:" : "联系方式：");
+                      lines.push(isEN ? "Contact:" : isSC ? "联系方式：" : "聯絡方式：");
                       contactEntries.forEach(([k, v]) => lines.push(`  ${k}：${v}`));
                     }
                     if (bPhone) {
                       lines.push("");
-                      lines.push(`${isEN ? "Notes" : "备注"}：${bPhone}`);
+                      lines.push(`${isEN ? "Notes" : isSC ? "备注" : "備註"}：${bPhone}`);
                     }
                     return lines.join("\n");
                   };
@@ -2648,7 +2648,7 @@ export default function App() {
                     }
                     setBSending(true);
                     const body = buildSummary();
-                    const subject = isEN ? `Ski Lesson Booking - ${bName}` : `滑雪预约请求 - ${bName}`;
+                    const subject = isEN ? `Ski Lesson Booking - ${bName}` : isSC ? `滑雪预约请求 - ${bName}` : `滑雪預約請求 - ${bName}`;
                     try {
                       const resp = await fetch("/api/bookings/send-email", {
                         method: "POST",
